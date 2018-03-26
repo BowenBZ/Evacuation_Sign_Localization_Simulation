@@ -25,49 +25,49 @@ saveas(gcf, 'output\4.png');
 %% Canculate the 2 errors of the path with noise
 [maxError_noise, accError_noise] = GetPositionError(path, path_noise);
 %% Fuse construction to the path
-prtcleNum = 100;              % 粒子个数
+particleNum = 100;            % 粒子个数
 % initialOffset= 20;          % 撒粒子范围
-prtcleWeight_cons = ones(1, prtcleNum) * 1 / prtcleNum;        % 粒子权值
+prtcleWeight_cons = ones(1, particleNum) * 1 / particleNum;        % 粒子权值
 distance = norm(path_noise(1, :) - path_noise(2, :)); Q = 5; theta = pi / length(path_noise);
 
 % realOffset = -initialOffset + 2 * initialOffset * rand(particleNum, 2);
-realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(prtcleNum, 2, 10 * log10(Q));
-prtcleSet_cons = repmat(path_noise(1,:), [prtcleNum 1]) + realOffset;
-path_fuseCons(1, :) = sum(prtcleSet_cons) / prtcleNum;
+realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(particleNum, 2, 10 * log10(Q));
+prtcleSet_cons = repmat(path_noise(1,:), [particleNum 1]) + realOffset;
+path_fuseConstruction(1, :) = sum(prtcleSet_cons) / particleNum;
 for cnt = 2: length(path_noise)
     % realOffset = -initialOffset + 2 * initialOffset * rand(particleNum, 2);
-    realOffset = distance * [-cos(cnt * theta) sin(cnt * theta)] + wgn(prtcleNum, 2, 10 * log10(Q));
+    realOffset = distance * [-cos(cnt * theta) sin(cnt * theta)] + wgn(particleNum, 2, 10 * log10(Q));
     prtcleSet_cons = prtcleSet_cons + realOffset; 
     
     [prtcleWeight_cons prtcleSet_cons] = UpdateParticle(prtcleWeight_cons, prtcleSet_cons, ...
         path(cnt, :), path_noise(cnt, :), boundaryPoints, 0);
-    path_fuseCons(cnt, 1) = prtcleWeight_cons * prtcleSet_cons(:, 1);
-    path_fuseCons(cnt, 2) = prtcleWeight_cons * prtcleSet_cons(:, 2);
+    path_fuseConstruction(cnt, 1) = prtcleWeight_cons * prtcleSet_cons(:, 1);
+    path_fuseConstruction(cnt, 2) = prtcleWeight_cons * prtcleSet_cons(:, 2);
 end
 hold on;
-scatter(path_fuseCons(:, 1), path_fuseCons(:, 2), 1, [1 0 1], 'filled');
+scatter(path_fuseConstruction(:, 1), path_fuseConstruction(:, 2), 1, [1 0 1], 'filled');
 hold off;
 saveas(gcf, 'output\5.png');
 %% Canculate the 2 errors of the path with noise cofused with construction
-[maxError_cons, accError_cons] = GetPositionError(path, path_fuseCons);
+[maxError_cons, accError_cons] = GetPositionError(path, path_fuseConstruction);
 maxErrorRate_cons = (maxError_noise - maxError_cons) / maxError_cons;
 accErrorRate_cons = (accError_noise - accError_cons) / accError_cons;
 %% Fuse signs to the path
-prtcleNum = 100;            % 粒子个数
-prtcleWeight_sign = ones(1, prtcleNum) * 1 / prtcleNum;   % 粒子权值
+particleNum = 100;            % 粒子个数
+particleWeight_sign = ones(1, particleNum) * 1 / particleNum;   % 粒子权值
 distance = norm(path_noise(1, :) - path_noise(2, :)); Q = 5; theta = pi / length(path_noise);
-realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(prtcleNum, 2, 10 * log10(Q));
-prtcleSet_sign = repmat(path_noise(1,:), [prtcleNum 1]) + realOffset;
+realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(particleNum, 2, 10 * log10(Q));
+prtcleSet_sign = repmat(path_noise(1,:), [particleNum 1]) + realOffset;
 path_fuseSign(1, :) = path_noise(1, :);
 for cnt = 2: length(path_noise)
     % realOffset = -initialOffset + 2 * initialOffset * rand(particleNum, 2);
-    realOffset = distance * [-cos(cnt * theta) sin(cnt * theta)] + wgn(prtcleNum, 2, 10 * log10(Q));
+    realOffset = distance * [-cos(cnt * theta) sin(cnt * theta)] + wgn(particleNum, 2, 10 * log10(Q));
     prtcleSet_sign = prtcleSet_sign + realOffset; 
     
-    [prtcleWeight_sign prtcleSet_sign] = UpdateParticle(prtcleWeight_sign, prtcleSet_sign,...
+    [particleWeight_sign prtcleSet_sign] = UpdateParticle(particleWeight_sign, prtcleSet_sign,...
         path(cnt, :), path_noise(cnt, :), boundaryPoints, 1, signType, signCoordinate);
-    path_fuseSign(cnt, 1) = prtcleWeight_sign * prtcleSet_sign(:, 1);
-    path_fuseSign(cnt, 2) = prtcleWeight_sign * prtcleSet_sign(:, 2);
+    path_fuseSign(cnt, 1) = particleWeight_sign * prtcleSet_sign(:, 1);
+    path_fuseSign(cnt, 2) = particleWeight_sign * prtcleSet_sign(:, 2);
 end
 hold on;
 scatter(path_fuseSign(:, 1), path_fuseSign(:, 2), 1, [0 0 0], 'filled');
