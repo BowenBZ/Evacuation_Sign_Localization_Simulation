@@ -1,57 +1,48 @@
-function [particleWeight particleSet] = UpdateParticle(varargin)
+function [particles weight] = UpdateParticle(varargin)
 %% Update particle's weight, then remove the low weight's particles, and copy the hight weight's particles
-%% particleWeight is a 1 * N array, particleSet is a N * 2 array
+%% particleWeight is a N * 1 array, particles is a N * 2 array
 
 %% Get elements from the varargin
-particleWeight = cell2mat(varargin(1));
-particleSet = cell2mat(varargin(2));
-currentPos = cell2mat(varargin(3));
-obserPos = cell2mat(varargin(4));
-boundPos = cell2mat(varargin(5));
-addSign = cell2mat(varargin(6));
+particles = cell2mat(varargin(1));
+weight = cell2mat(varargin(2));
+prePos = cell2mat(varargin(3));
+currentPos = cell2mat(varargin(4));
+obserVec = cell2mat(varargin(5));
+boundPos = cell2mat(varargin(6));
+addSign = cell2mat(varargin(7));
 if(addSign)
-   signType = cell2mat(varargin(7));
-   signPos = cell2mat(varargin(8));
+   signType = cell2mat(varargin(8));
+   signPos = cell2mat(varargin(9));
 end
 
 %% Update particle's weight according to 
-%% 1) whether this particle is in the boundary
-%% 2) the distance between the particle and obserPos
+% 1) Canculate the distance of the particles and the observation
 R = 5;
-distance = particleSet - repmat(obserPos, [length(particleSet) 1]);
-distance = (sum(abs(distance).^2,2).^(1/2))';
-particleWeight = (1 / sqrt(R) / sqrt(2 * pi)) * exp(-(distance).^2 / 2 / R);
-in = inpolygon(particleSet(:, 1), particleSet(:, 2), ...
-        boundPos(:, 1), boundPos(:, 2));
-particleWeight(find(in == 0)) = 0;
-%% 3) the information of the signs
+distanceSqu = sum((particles - prePos - obserVec).^2, 2);
+distance = distanceSqu.^(1/2);
+weight = (1 / sqrt(R) / sqrt(2 * pi)) * exp(-(distance).^2 / 2 / R);
+% 2) If the particle is out of the corridor, weight set 0
+index = inpolygon(particles(:, 1), particles(:, 2), boundPos(:, 1), boundPos(:, 2));
+weight(find(index == 0)) = 0;
+% 3) the information of the signs
 if(addSign ~= 0)
     [type index distance] = GetEvacualationSignInfo(currentPos, signType, signPos);
     if(type ~= -1)
-        dist = abs((sum(abs(particleSet - signPos(index, :)).^2,2).^(1/2)) ...
-            - distance);
-        particleWeight(find(dist > 3)) = 0;
+        distSqu = sum((particles - signPos(index, :)).^2, 2);
+        dist = abs(distSqu.^(1/2)) - distance;
+        weight(find(dist > 3)) = 0;
     end
 end
-particleWeight = particleWeight / sum(particleWeight);
-%% Update particles according to its weight
-% lowThreshold = 0.1;
-uselessParticleNum = length(find(particleWeight == 0));
-if(uselessParticleNum == 0)
-    return;
+if(sum(weight) == 0)
+    weight =  ones(1, length(weight)) * 1 / length(weight);
 else
-    largeParticleNum = 1;
-    weightList = sort(particleWeight);
-    weightList = weightList(end - (largeParticleNum - 1): end);
-    for cnt = 1: largeParticleNum
-        tempset = particleSet(find(particleWeight == weightList(cnt)), :);
-        largeParticleSet(cnt, :) = tempset(1, :);
-    end
-    copyTime = ceil(uselessParticleNum / largeParticleNum);
-    largeParticleSet = repmat(largeParticleSet, [copyTime, 1]);
-    particleSet(find(particleWeight == 0), :) = largeParticleSet(1: uselessParticleNum, :);
-end 
+    weight = weight / sum(weight);
 end
+%% Update particles according to its weight
+outIndex = residualR(weight');
+temp = particles(outIndex, :);
+particles = temp;
+
 %{
 %重采样（更新）
 for i = 1 : length(particleWeight)
@@ -60,10 +51,11 @@ for i = 1 : length(particleWeight)
     while(wmax > particleWeight(index))
         wmax = wmax - particleWeight(index);
         index = index + 1;
-        if index > length(particleWeight)
+        if(index > length(particleWeight))
             index = 1;
         end          
     end
     particleSet(i, :) = particleSet(index, :);     %得到新粒子
 end
 %}
+end

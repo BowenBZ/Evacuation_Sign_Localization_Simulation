@@ -1,8 +1,8 @@
 %% Draw evacualation signs and corridor's boundary
 hold on;
-plot(boundaryPoints(:, 1), boundaryPoints(:, 2), 'color', [0 0 0], 'linewidth', 1.4);
-scatter(signCoordinate(:, 1), signCoordinate(:, 2), 'filled');
-for cnt = 1: length(signCoordinate)
+plot(boundPos(:, 1), boundPos(:, 2), 'color', [0 0 0], 'linewidth', 1.4);
+scatter(signPos(:, 1), signPos(:, 2), 'filled');
+for cnt = 1: length(signPos)
     switch signType(cnt)
         case 0
             showTypeText = 'Exit';
@@ -17,6 +17,6 @@ for cnt = 1: length(signCoordinate)
             showTypeText= 'two-way';
             offset = -30;
     end
-    text(signCoordinate(cnt, 1) - 25, signCoordinate(cnt, 2) + offset, showTypeText, 'FontSize', 15);
+    text(signPos(cnt, 1) - 25, signPos(cnt, 2) + offset, showTypeText, 'FontSize', 15);
 end
 hold off;

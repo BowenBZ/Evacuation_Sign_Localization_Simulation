@@ -1,4 +1,5 @@
-function [maxError accError] = GetPositionError(realPath, obserPath)
-maxError = max(sum(abs(realPath - obserPath).^2, 2).^(1/2));
-accError = sum(sum(abs(realPath - obserPath).^2, 2).^(1/2));
+function [maxErr accErr] = GetPositionError(realPath, obserPath)
+disSqua = sum((realPath - obserPath).^2, 2);
+maxErr = max(disSqua.^(1/2));
+accErr = sum(disSqua.^(1/2));
 end

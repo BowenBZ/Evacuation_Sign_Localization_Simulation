@@ -1,4 +1,4 @@
-function [path pathLength frequency] = GeneratePath(varargin)
+function [path pathLength frequency] = GenerateRealPath(varargin)
 %% Generate path for the map, can load from database or manaually set
 %% source: 'database', 'manual'
 %% when source is database, the next element is filename; when source is manaual, 

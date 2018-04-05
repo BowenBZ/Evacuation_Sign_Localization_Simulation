@@ -1,85 +1,125 @@
+%% Rule of Name: case的class(真实的路径):class_case, name的element(路径长度):nameElement, 
 %% Show the map
 clear; clc;
-load signType; load signCoordinate; load boundaryPoints;
+load parameter;
 map = imread('fit6.jpg'); imshow(map); title('FIT6楼平面图');
-saveas(gcf, 'output\1.png');
+% saveas(gcf, 'output\1.png');
 DrawSigns();
-saveas(gcf, 'output\2.png');
-%% Generate and show the path
-[path pathLength frequency] = GeneratePath('database', 'route.mat');
+% saveas(gcf, 'output\2.png');
+%% Generate real walking path
+[path_real pathLength frequency] = GenerateRealPath('database', 'route.mat');
 % [path pathLength frequency] = GeneratePath('manaual', 50, 100);
-hold on; scatter(path(:, 1), path(:, 2), 0.7, 'r', 'filled'); hold off;
-saveas(gcf, 'output\3.png');
-%% Add noise to the path data
+%% Show real walking path
+hold on; scatter(path_real(:, 1), path_real(:, 2), 0.7, 'r', 'filled'); hold off;
+% saveas(gcf, 'output\3.png');
+%% Get the observed path
 noise = 0.5;
-path_noise = GeneratePathWithError(path, noise);
-%% Show the path with noise, the part out of the corridor is blue, inside is green
-in=inpolygon(path_noise(:, 1), path_noise(:, 2), ...
-        boundaryPoints(:, 1), boundaryPoints(:, 2));
-inCorr = find(in == 1); outCorr = find(in == 0);
+[path_obser index_in index_out] = GenerateObservedPath(path_real, noise, boundPos);
+%% Show the observed path, in the corridor: green, out: blue
 hold on; 
-scatter(path_noise(inCorr, 1), path_noise(inCorr, 2), 0.7, 'g', 'filled'); 
-scatter(path_noise(outCorr, 1), path_noise(outCorr, 2), 0.7, 'b', 'filled'); 
+scatter(path_obser(index_in, 1), path_obser(index_in, 2), 0.7, 'g', 'filled'); 
+scatter(path_obser(index_out, 1), path_obser(index_out, 2), 0.7, 'b', 'filled'); 
 hold off;
-saveas(gcf, 'output\4.png');
+% saveas(gcf, 'output\4.png');
 %% Canculate the 2 errors of the path with noise
-[maxError_noise, accError_noise] = GetPositionError(path, path_noise);
-%% Fuse construction to the path
-particleNum = 100;            % 粒子个数
-% initialOffset= 20;          % 撒粒子范围
-prtcleWeight_cons = ones(1, particleNum) * 1 / particleNum;        % 粒子权值
-distance = norm(path_noise(1, :) - path_noise(2, :)); Q = 5; theta = pi / length(path_noise);
+[maxErr_obser, accErr_obser] = GetPositionError(path_real, path_obser);
+fprintf(['Path with noise:\nMax Error: ' num2str(maxErr_obser) ' Accumulate Error: ' num2str(accErr_obser) '\n']);
+%% Use Particle Filter
+%{
+prtcleNum = 100;
+Q = 10;
+R = 1;
+step(1).Xpf = zeros(prtcleNum, 2);         % 粒子滤波估计状态
+step(1).Xparticles = zeros(prtcleNum, 2);  % 粒子集合
+step(1).Zpre_pf = zeros(prtcleNum, 2);     % 粒子滤波观测预测值
+step(1).weight = zeros(prtcleNum, 1);      % 权重初始化
 
+step(1).Xpf = path_noise(1, :) + sqrt(Q) * randn(prtcleNum, 2);
+step(1).Zpre_pf = step(1).Xpf;
+
+for k = 2: length(path_noise)
+   for i = 1: prtcleNum
+      QQ = Q; 
+      net = sqrt(QQ) * randn(1, 2);
+      step(k).Xparticles(i, :) = step(k - 1).Xpf(i, :) + net;
+   end
+   
+   for i = 1: prtcleNum
+      step(k).Zpre_pf(i, :) = step(k).Xparticles(i, :);
+      step(k).weight(i, :) = exp(-0.5 * R ^(-1) * (norm(path_noise(k, :) - step(k).Zpre_pf(i, :)))^2);
+   end
+   step(k).weight(:, 1) = step(k).weight(:, 1)./sum(step(k).weight);
+   
+   outIndex = residualR(step(k).weight(:,1)');
+   
+   step(k).Xpf = step(k).Xparticles(outIndex, :);
+end
+
+bins = 20;
+Xmap_pf = zeros(length(path_noise), 2);
+for k = 1: length(path_noise)
+   %[p, pos] = hist(step(k).Xpf, bins);
+   %map = find(p==max(p));
+   %Xmap_pf(k, :) = pos(map(1), :);
+   Xmap_pf(k, :) = sum(step(k).Xpf) / prtcleNum;
+end
+hold on; scatter(Xmap_pf(:, 1), Xmap_pf(:, 2), 1, [1 0 1], 'filled'); hold off;
+%}
+
+%% Fuse construction to the path
+% initialOffset= 20;               % 撒粒子范围
+% distance = norm(path_obser(1, :) - path_obser(2, :)); theta = pi / length(path_obser);
 % realOffset = -initialOffset + 2 * initialOffset * rand(particleNum, 2);
-realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(particleNum, 2, 10 * log10(Q));
-prtcleSet_cons = repmat(path_noise(1,:), [particleNum 1]) + realOffset;
-path_fuseConstruction(1, :) = sum(prtcleSet_cons) / particleNum;
-for cnt = 2: length(path_noise)
-    % realOffset = -initialOffset + 2 * initialOffset * rand(particleNum, 2);
-    realOffset = distance * [-cos(cnt * theta) sin(cnt * theta)] + wgn(particleNum, 2, 10 * log10(Q));
-    prtcleSet_cons = prtcleSet_cons + realOffset; 
-    
-    [prtcleWeight_cons prtcleSet_cons] = UpdateParticle(prtcleWeight_cons, prtcleSet_cons, ...
-        path(cnt, :), path_noise(cnt, :), boundaryPoints, 0);
-    path_fuseConstruction(cnt, 1) = prtcleWeight_cons * prtcleSet_cons(:, 1);
-    path_fuseConstruction(cnt, 2) = prtcleWeight_cons * prtcleSet_cons(:, 2);
+% realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(prtcleNum, 2, 10 * log10(Q));
+
+prtcleNum_cons = 1000;              % 粒子个数
+Q = 1000;
+prtcle_cons = repmat(path_obser(1,:), [prtcleNum_cons 1]) + sqrt(Q) * randn(prtcleNum_cons, 2);     % 粒子，代表着状态量X，用于计算path_cons
+weight_cons = ones(prtcleNum_cons, 1) * 1 / prtcleNum_cons;        % 粒子权值，用于粒子重采样
+path_cons(1, :) = sum(prtcle_cons) / prtcleNum_cons;     % 粒子预测的状态
+
+for cnt = 2: length(path_obser) 
+    % Update the particles of the next time point
+    prtcle_cons = prtcle_cons + sqrt(Q) * randn(prtcleNum_cons, 2);
+    % Canculate the weight of particles and resample the particles
+    [prtcle_cons weight_cons] = UpdateParticle(prtcle_cons, weight_cons, path_cons(cnt-1, :), ...
+        path_real(cnt, :), path_obser(cnt,:) - path_obser(cnt-1, :), boundPos, 0);
+    % Canculate the path according to the particle set
+    path_cons(cnt, :) = sum(prtcle_cons) / prtcleNum_cons;
 end
-hold on;
-scatter(path_fuseConstruction(:, 1), path_fuseConstruction(:, 2), 1, [1 0 1], 'filled');
-hold off;
-saveas(gcf, 'output\5.png');
-%% Canculate the 2 errors of the path with noise cofused with construction
-[maxError_cons, accError_cons] = GetPositionError(path, path_fuseConstruction);
-maxErrorRate_cons = (maxError_noise - maxError_cons) / maxError_cons;
-accErrorRate_cons = (accError_noise - accError_cons) / accError_cons;
+%% Show the path confused with construction
+hold on; scatter(path_cons(:, 1), path_cons(:, 2), 1, [1 0 1], 'filled'); hold off;
+% saveas(gcf, 'output\5.png');
+%% Canculate the errors of path_cons compared with the observed path
+[maxErr_cons, accErr_cons] = GetPositionError(path_real, path_cons);
+maxErrRate_cons = (maxErr_obser - maxErr_cons) / maxErr_obser; 
+accErrRate_cons = (accErr_obser - accErr_cons) / accErr_o;
+%% Show errors
+fprintf(['Path coufused construction:\nMax error: ' num2str(maxErr_cons) ' Accumulate error: ' num2str(accErr_cons) '\n']);
+fprintf(['Max error decrease: ' num2str(maxErrRate_cons) ' Accumulate error decrease: ' num2str(accErrRate_cons) '\n']);
 %% Fuse signs to the path
-particleNum = 100;            % 粒子个数
-particleWeight_sign = ones(1, particleNum) * 1 / particleNum;   % 粒子权值
-distance = norm(path_noise(1, :) - path_noise(2, :)); Q = 5; theta = pi / length(path_noise);
-realOffset = distance * [-cos(1 * theta) sin(1 * theta)] + wgn(particleNum, 2, 10 * log10(Q));
-prtcleSet_sign = repmat(path_noise(1,:), [particleNum 1]) + realOffset;
-path_fuseSign(1, :) = path_noise(1, :);
-for cnt = 2: length(path_noise)
-    % realOffset = -initialOffset + 2 * initialOffset * rand(particleNum, 2);
-    realOffset = distance * [-cos(cnt * theta) sin(cnt * theta)] + wgn(particleNum, 2, 10 * log10(Q));
-    prtcleSet_sign = prtcleSet_sign + realOffset; 
-    
-    [particleWeight_sign prtcleSet_sign] = UpdateParticle(particleWeight_sign, prtcleSet_sign,...
-        path(cnt, :), path_noise(cnt, :), boundaryPoints, 1, signType, signCoordinate);
-    path_fuseSign(cnt, 1) = particleWeight_sign * prtcleSet_sign(:, 1);
-    path_fuseSign(cnt, 2) = particleWeight_sign * prtcleSet_sign(:, 2);
+prtcleNum_sign = 100;            % 粒子个数
+Q = 50;
+prtcle_sign = repmat(path_obser(1,:), [prtcleNum_sign 1]) + sqrt(Q) * randn(prtcleNum_sign, 2);
+weight_sign = ones(1, prtcleNum_sign) * 1 / prtcleNum_sign;   % 粒子权值
+path_sign(1, :) = sum(prtcle_sign) / prtcleNum_sign;
+
+for cnt = 2: length(path_obser)
+    % Update the particles of the next time point
+    prtcle_sign = prtcle_sign + sqrt(Q) * randn(prtcleNum_sign, 2); 
+    % Canculate the weight of particles and resample the particles
+    [prtcle_sign weight_sign] = UpdateParticle(prtcle_sign, weight_sign, path_sign(cnt-1, :), ...
+        path_real(cnt, :), path_obser(cnt, :) - path_obser(cnt-1, :), boundPos, 1, signType, signPos);
+    % Canculate the path according to the particle set
+    path_sign(cnt, :) = sum(prtcle_sign) / prtcleNum_sign;
 end
-hold on;
-scatter(path_fuseSign(:, 1), path_fuseSign(:, 2), 1, [0 0 0], 'filled');
-hold off;
-saveas(gcf, 'output\6.png');
+%% Show the path confused with signs
+hold on; scatter(path_sign(:, 1), path_sign(:, 2), 1, [0 0 0], 'filled'); hold off;
+% saveas(gcf, 'output\6.png');
 %% Canculate the 2 errors of the path with noise cofused with signs
-[maxError_sign, accError_sign] = GetPositionError(path, path_fuseSign);
-maxErrorRate_sign = (maxError_noise - maxError_sign) / maxError_sign;
-accErrorRate_sign = (accError_noise - accError_sign) / accError_sign;
+[maxErr_sign, accErr_sign] = GetPositionError(path_real, path_sign);
+maxErrRate_sign = (maxErr_obser - maxErr_sign) / maxErr_obser;
+accErrRate_sign = (accErr_obser - accErr_sign) / accErr_obser;
 %% Show error
-fprintf(['Path with noise:\nMax error: ' num2str(maxError_noise) ' Acc error: ' num2str(accError_noise) '\n']);
-fprintf(['Path coufused construction:\nMax error: ' num2str(maxError_cons) ' Acc error: ' num2str(accError_cons) '\n']);
-fprintf(['Max error decrease: ' num2str(maxErrorRate_cons) ' Acc error decrease: ' num2str(accErrorRate_cons) '\n']);
-fprintf(['Path coufused sign:\nMax error: ' num2str(maxError_sign) ' Acc error: ' num2str(accError_sign) '\n']);
-fprintf(['Max error decrease: ' num2str(maxErrorRate_sign) ' Acc error decrease: ' num2str(accErrorRate_sign) '\n']);
+fprintf(['Path coufused sign:\nMax error: ' num2str(maxErr_sign) ' Accmulate error: ' num2str(accErr_sign) '\n']);
+fprintf(['Max error decrease: ' num2str(maxErrRate_sign) ' Accmulate error decrease: ' num2str(accErrRate_sign) '\n']);

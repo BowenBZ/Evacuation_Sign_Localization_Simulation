@@ -21,7 +21,7 @@ Z(:, 1) = [50; 20] + wgn(2, 1, 10*log10(R));    %初始系统的观测状态
 for i = 1 : N
     P(:, i) = [WorldSize*rand; WorldSize*rand];
     dist = norm(P(:, i)-Z(:, 1));     %与测量位置相差的距离
-    w(i) = (1 / sqrt(R) / srt(2 * pi)) * exp(-(dist)^2 / 2 / R);   %求权重, 未归一
+    w(i) = (1 / sqrt(R) / sqrt(2 * pi)) * exp(-(dist)^2 / 2 / R);   %求权重, 未归一
 end
 PCenter(:, 1) = sum(P, 2) / N;      %所有粒子的几何中心位置
 
