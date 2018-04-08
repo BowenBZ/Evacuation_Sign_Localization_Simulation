@@ -1,6 +1,6 @@
 %% Draw evacualation signs and corridor's boundary
 hold on;
-plot(boundPos(:, 1), boundPos(:, 2), 'color', [0 0 0], 'linewidth', 1.4);
+plot(boundPos(:, 1), boundPos(:, 2), 'color', [217, 83, 25] / 255, 'linewidth', 1.4);
 scatter(signPos(:, 1), signPos(:, 2), 'filled');
 for cnt = 1: length(signPos)
     switch signType(cnt)
@@ -9,7 +9,11 @@ for cnt = 1: length(signPos)
             offset = 30;
         case 1
             showTypeText = 'Left';
-            offset = -30;
+            if(cnt ~= length(signPos))
+                offset = -30;
+            else
+                offset = 30;
+            end
         case 2
             showTypeText = 'right';
             offset = -30;

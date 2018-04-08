@@ -2,7 +2,7 @@
 %% The top left is origin point, left to right is +x, up to down is +y
 clear;
 clc;
-map = imread('fit6.jpg');
+map = imread('fit6_part.jpg');
 imshow(map);
 boundaryPoints = ginput();
 boundaryPoints(end + 1, :) = boundaryPoints(1, :);
