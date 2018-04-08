@@ -21,8 +21,12 @@ elseif(nargin == 3)
         for cnt = 1: length(pointSquence)
             if(exist('path_std', 'var'))
                 newPart = Walk(pointSquence(cnt, 1:2), pointSquence(cnt, 3:4), speed, frequency);
-                middlePoint = VectorInterp([path_std(end - 3 : end, :); newPart(2: 4, :)]);
-                path_std(end - 3: end, :) = []; newPart(1: 4, :) = [];      
+                % middlePoint = VectorInterp([path_std(end - 3 : end, :); newPart(2: 4, :)]);
+                % path_std(end - 3: end, :) = []; newPart(1: 4, :) = [];
+                newPart(1, :) = [];
+                middlePoint = (path_std(end - 1, :) + path_std(end, :)) / 2;
+                middlePoint = [middlePoint; path_std(end, :)];
+                path_std(end, :) = [];
                 path_std = [path_std; middlePoint; newPart];
             else
                 path_std = Walk(pointSquence(cnt, 1:2), pointSquence(cnt, 3:4), speed, frequency);
