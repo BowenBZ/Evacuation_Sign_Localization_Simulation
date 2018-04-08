@@ -15,7 +15,7 @@ newVector(:, 1) = vector_length_n .* cos(vector_angle_n);
 newVector(:, 2) = vector_length_n .* sin(vector_angle_n);
 %}
 newVector = awgn(vector, noise);
-figure; subplot(1,2,1); hold on; plot(vector_length); hold off;
+figure; subplot(1,2,1); hold on; plot(vector_length); hold off; axis([0 length(vector_length) 0.4 0.6]);
 subplot(1,2,2); hold on; plot(vector_angle);  hold off;%plot(newVector(:,2)); hold off;
 %% Generate observed path
 path_obser(1, :) = path_real(1, :);

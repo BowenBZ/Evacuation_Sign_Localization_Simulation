@@ -1,5 +1,5 @@
 %% Rule of Name: case的class(真实的路径):class_case, name的element(路径长度):nameElement, 
-%% Show the map
+%% Show the map 10约为1m
 clear; clc;
 savepic = 0;
 load parameter_part;
@@ -14,10 +14,9 @@ if(savepic) saveas(gcf, 'output\2.png'); end
 hold on; scatter(path_real(:, 1), path_real(:, 2), 0.7, 'r', 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\3.png'); end
 %% Get the observed path
-%{
 noise = 50;
 [path_obser index_in index_out] = GenerateObservedPath(path_real, noise, boundPos);
-
+%{
 %% Show the observed path, in the corridor: green, out: blue
 hold on; 
 scatter(path_obser(index_in, 1), path_obser(index_in, 2), 1, 'g', 'filled'); 
