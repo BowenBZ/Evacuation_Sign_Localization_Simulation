@@ -4,19 +4,19 @@ path_copy = path_real;
 path_real(end, :) = []; path_copy(1, :) = [];
 vector = path_copy - path_real;           % 惯性单元测量出来的是位置点之间的增量
 %% Add noise
-
 vector_length = (sum(vector.^2, 2)).^(1/2);
 vector(find(vector(:, 1) == 0), 1) = 0.0001;
-vector_angle = -atan(vector(:, 2) ./ vector(:, 1));
+vector_angle = GetAngle(vector(:, 1), vector(:, 2));
+obvector_length = vector_length .* (1 + 0.004 * randn(length(vector_length), 1));
+obvector_angle = vector_angle .* (1 + 0.08 * randn(1, length(vector_angle)));
+
 %{
-vector_length_n = awgn(vector_length, noise_length);  % 给每次测量的增量都加入高斯噪声
-vector_angle_n = awgn(vector_angle, noise_angle);
 newVector(:, 1) = vector_length_n .* cos(vector_angle_n);
 newVector(:, 2) = vector_length_n .* sin(vector_angle_n);
 %}
 newVector = awgn(vector, noise);
-figure; subplot(1,2,1); hold on; plot(vector_length); hold off; axis([0 length(vector_length) 0.4 0.6]);
-subplot(1,2,2); hold on; plot(vector_angle);  hold off;%plot(newVector(:,2)); hold off;
+figure; subplot(1,2,1); hold on; plot(vector_length); hold off;axis([0 length(vector_length) 0.4 0.6]); %plot(obvector_length); hold off; axis([0 length(vector_length) 0.4 0.6]); legend('real', 'observed');
+subplot(1,2,2); hold on; plot(vector_angle); %{plot(obvector_angle); hold off; legend('real', 'observed');
 %% Generate observed path
 path_obser(1, :) = path_real(1, :);
 for cnt = 1: length(newVector)
