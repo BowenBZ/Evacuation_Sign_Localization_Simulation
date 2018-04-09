@@ -26,7 +26,7 @@ elseif(nargin == 3)
                 smoothIndex_pre = 3; smoothIndex_cur = 3;
                 vector_pre = pointSquence(cnt-1, 3:4) - pointSquence(cnt-1, 1:2);
                 vector_cur = pointSquence(cnt, 3:4) - pointSquence(cnt, 1:2);
-                middlePoints = VectorInterp([path_real(end - (smoothIndex_pre - 1): end, :);
+                middlePoints = VectorInterp([path_real(end - (smoothIndex_pre - 1): end, :); ...
                                              newPart(2: smoothIndex_cur, :)], ...
                                                 vector_pre, vector_cur, speed, frequency);
                 path_real(end - (smoothIndex_pre - 1): end, :) = []; 

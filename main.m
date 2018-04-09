@@ -8,15 +8,15 @@ if(savepic) saveas(gcf, 'output\1.png'); end
 DrawSigns();
 if(savepic) saveas(gcf, 'output\2.png'); end
 %% Generate real walking path
-% [path_real pathLength frequency] = GenerateRealPath('database', 'route2.mat');
-[path_real pathLength frequency] = GenerateRealPath('manaual', 50, 100);
+[path_real pathLength frequency] = GenerateRealPath('database', 'route2.mat');
+% [path_real pathLength frequency] = GenerateRealPath('manaual', 50, 100);
 %% Show real walking path
 hold on; scatter(path_real(:, 1), path_real(:, 2), 0.7, 'r', 'filled'); hold off;
+%{
 if(savepic) saveas(gcf, 'output\3.png'); end
 %% Get the observed path
 noise = 50;
 [path_obser index_in index_out] = GenerateObservedPath(path_real, noise, boundPos);
-%{
 %% Show the observed path, in the corridor: green, out: blue
 hold on; 
 scatter(path_obser(index_in, 1), path_obser(index_in, 2), 1, 'g', 'filled'); 
