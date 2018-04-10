@@ -14,8 +14,8 @@ if(savepic) saveas(gcf, 'output\2.png'); end
 figure(1); hold on; scatter(path_real(:, 1), path_real(:, 2), 0.7, 'r', 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\3.png'); end
 %% Get the observed path
-noise_length = 100; noise_angle = 5;
-[path_obser index_in index_out] = GenerateObservedPath(path_real, noise_length, noise_angle, boundPos);
+lengthStd = 10; angleStd = 1;
+[path_obser index_in index_out] = GenerateObservedPath(path_real, lengthStd, angleStd, boundPos);
 %% Show the observed path, in the corridor green, out: blue
 figure(1);
 hold on; 
