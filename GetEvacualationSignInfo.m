@@ -1,6 +1,6 @@
 function [type index distance] = GetEvacualationSignInfo(currentPos, signType, signCoordinate)
 %% Get the type of the signs and the distance towards to the sign
-%% type: -1 表示没有获取到, 当前位置距离标识牌40以上则记为没有看见标识牌
+%% type: -1: Not detect signs
 detectionThresDistance = 40;
 distanceList = (sum(abs(signCoordinate - currentPos).^2,2).^(1/2));
 [minDistance index] = min(distanceList);
