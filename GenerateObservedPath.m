@@ -6,25 +6,35 @@ vector = path_copy - path_real;           % 惯性单元测量出来的是位置点之间的增量
 %% Add noise
 vector_length = (sum(vector.^2, 2)).^(1/2);
 vector_angle = GetAngle(vector(:, 1), vector(:, 2))';
-Guassian = randn(length(vector_length), 1); 
-Guassian = Guassian - mean(Guassian); Guassian = Guassian - std(Guassian);
 
-obvector_length = vector_length + lengthStd * Guassian;
-obvector_angle = vector_angle + angleStd * Guassian;
+Guassian = randn(length(vector_length), 1); 
+Guassian = Guassian - mean(Guassian); Guassian = Guassian / std(Guassian);
+dt = 1/100;
+gdStd_length = lengthStd(1) / sqrt(dt);     % Guassian White Noise
+gdStd_angle = angleStd(1) / sqrt(dt);
+bgdStd_length = lengthStd(2) * sqrt(dt);    % Random Noise
+bgdStd_angle = angleStd(2) * sqrt(dt);
+
+gw_length = gdStd_length * Guassian;
+gw_angle = gdStd_angle * Guassian;
+bias_length(1) = 0;
+bias_angle(1) = 0;
+for cnt = 2: length(vector_length)
+    bias_length(cnt) = bias_length(cnt-1) + bgdStd_length * Guassian(cnt);
+    bias_angle(cnt) = bias_angle(cnt-1) + bgdStd_angle * Guassian(cnt);
+end
+obvector_length = vector_length + gw_length + bias_length';
+obvector_angle = vector_angle + gw_angle + bias_angle';
 %{
-obvector = awgn(vector, 1, 'measured', 'linear');
-obvector_length = (sum(obvector.^2, 2)).^(1/2);
-obvector_angle = GetAngle(obvector(:, 1), obvector(:, 2))';
-%}
-%{
+Use awgn to add noise(use SNR as parameter)
 SNR_length = 10; SNR_angle = 10;
 obvector_length = awgn(vector_length, 10, 'measured', 'linear');    % Guassian White Noise
 obvector_angle = awgn(vector_angle, 10, 'measured', 'linear');
 %}
 obvector = [vector_length.*cosd(obvector_angle) vector_length.*sind(obvector_angle)];
 %% Show the origin vectors and observed vectors
-figure(2); subplot(1,2,1); hold on; plot(vector_length); plot(obvector_length); hold off; legend('real', 'observed'); %axis([0 length(vector_length) 0.4 0.6]);
-subplot(1,2,2); hold on; plot(vector_angle); plot(obvector_angle); hold off; legend('real', 'observed');
+figure(2); subplot(1,2,1); hold on; plot(obvector_length); plot(vector_length);  hold off; legend('real', 'observed'); %axis([0 length(vector_length) 0.4 0.6]);
+subplot(1,2,2); hold on; plot(obvector_angle); plot(vector_angle);  hold off; legend('real', 'observed');
 %% Generate observed path
 path_obser(1, :) = path_real(1, :);
 for cnt = 1: length(obvector)
