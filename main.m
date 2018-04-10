@@ -26,20 +26,7 @@ if(savepic) saveas(gcf, 'output\3.png'); end
 [maxErr_obser, accErr_obser] = GetPositionError(path_real, path_obser);
 fprintf(['Path with noise:\nMax Error: ' num2str(maxErr_obser) ' Accumulate Error: ' num2str(accErr_obser) '\n']);
 %% Fuse map to the path
-prtcleNum_map = 1000;
-Q = 1000;
-prtcle_map = repmat(path_obser(1,:), [prtcleNum_map 1]) + sqrt(Q) * randn(prtcleNum_map, 2);
-weight_map = ones(prtcleNum_map, 1) * 1 / prtcleNum_map;    
-path_map(1, :) = sum(prtcle_map) / prtcleNum_map;
-for cnt = 2: length(path_obser) 
-    % Update the particles of the next time point
-    prtcle_map = prtcle_map + sqrt(Q) * randn(prtcleNum_map, 2);
-    % Canculate the weight of particles and resample the particles
-    [prtcle_map weight_map] = UpdateParticle(prtcle_map, weight_map, ...
-        path_map(cnt-1, :), path_obser(cnt,:) - path_obser(cnt-1, :), boundPos, 0);
-    % Canculate the path according to the particle set
-    path_map(cnt, :) = sum(prtcle_map) / prtcleNum_map;
-end
+path_map = PredictMapPath(path_real, path_obser, boundPos);
 %% Show the path confused with construction
 figure(1); hold on; scatter(path_map(:, 1), path_map(:, 2), 1, [1 0 1], 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\5.png'); end
@@ -51,24 +38,8 @@ accErrRate_map = (accErr_obser - accErr_map) / accErr_obser * 100;
 fprintf(['Path coufused construction:\nMax error: ' num2str(maxErr_map) ' Accumulate error: ' num2str(accErr_map) '\n']);
 fprintf(['Max error decrease: ' num2str(maxErrRate_map) '%% Accumulate error decrease: ' num2str(accErrRate_map) '%%\n']);
 %% Fuse signs to the path
-tic
-prtcleNum_sign = 1000;            % 粒子个数
-Q = 1000;
 signWeight = 0.05;
-prtcle_sign = repmat(path_obser(1,:), [prtcleNum_sign 1]) + sqrt(Q) * randn(prtcleNum_sign, 2);
-weight_sign = ones(1, prtcleNum_sign) * 1 / prtcleNum_sign;   % 粒子权值
-path_sign(1, :) = sum(prtcle_sign) / prtcleNum_sign;
-
-for cnt = 2: length(path_obser)
-    % Update the particles of the next time point
-    prtcle_sign = prtcle_sign + sqrt(Q) * randn(prtcleNum_sign, 2); 
-    % Canculate the weight of particles and resample the particles
-    [prtcle_sign weight_sign] = UpdateParticle(prtcle_sign, weight_sign, ...
-        path_sign(cnt-1, :), path_obser(cnt, :) - path_obser(cnt-1, :), boundPos, 1, ...
-            path_real(cnt, :), signType, signPos, signWeight);
-    % Canculate the path according to the particle set
-    path_sign(cnt, :) = sum(prtcle_sign) / prtcleNum_sign;
-end
+path_sign = PredictSignPath(path_real, path_obser, boundPos, signType, signPos, signWeight);
 %% Show the path confused with signs
 figure(1); hold on; scatter(path_sign(:, 1), path_sign(:, 2), 1, [0 0 0], 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\6.png'); end
@@ -79,7 +50,6 @@ accErrRate_sign = (accErr_obser - accErr_sign) / accErr_obser * 100;
 %% Show error
 fprintf(['Path coufused sign:\nMax error: ' num2str(maxErr_sign) ' Accmulate error: ' num2str(accErr_sign) '\n']);
 fprintf(['Max error decrease: ' num2str(maxErrRate_sign) '%% Accmulate error decrease: ' num2str(accErrRate_sign) '%% \n']);
-toc
 %% Use Particle Filter
 %{
 prtcleNum = 100;
