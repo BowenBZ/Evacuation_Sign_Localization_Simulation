@@ -1,5 +1,5 @@
 function angle = GetAngle(x, y)
-%% Get angles from slopes in figure's coordinate
+%% Get angles(deg) from slopes in figure's coordinate
 list1 = find(x>=0);
 list2 = find(x<0 & y<0);
 list3 = find(x<0 & y>=0);

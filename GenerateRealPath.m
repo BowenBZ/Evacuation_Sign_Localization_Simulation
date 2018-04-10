@@ -15,30 +15,31 @@ elseif(nargin == 3)
     frequency = double(string(varargin(3)));
     if(source == 'manaual')
         %% Choose key points
-        pointSquence = GetPointFromMap();
-        pathLength = sum(sum(abs(pointSquence(:,1:2) - pointSquence(:, 3:4)).^2, 2).^(1/2));
+        [bgPoint edPoint] = GetPointFromMap();
+        pathLength = sum(sum(abs(bgPoint - edPoint).^2, 2).^(1/2));
         %% Generate the path
-        for cnt = 1: size(pointSquence, 1)
+        for cnt = 1: size(bgPoint, 1)
             if(exist('path_real', 'var'))
                 % Generate a new path
-                newPart = Walk(pointSquence(cnt, 1:2), pointSquence(cnt, 3:4), speed, frequency);              
+                newPart = Walk(bgPoint(cnt, :), edPoint(cnt, :), speed, frequency);              
                 % Generate some middle points;
                 smoothIndex_pre = 3; smoothIndex_cur = 3;
-                vector_pre = pointSquence(cnt-1, 3:4) - pointSquence(cnt-1, 1:2);
-                vector_cur = pointSquence(cnt, 3:4) - pointSquence(cnt, 1:2);
+                smoothIndex_cur = min(3, length(newPart));
+                vector_pre = edPoint(cnt-1, :) - bgPoint(cnt-1, :);
+                vector_cur = edPoint(cnt, :) - bgPoint(cnt, :);
                 middlePoints = VectorInterp([path_real(end - (smoothIndex_pre - 1): end, :); ...
                                              newPart(2: smoothIndex_cur, :)], ...
                                                 vector_pre, vector_cur, speed, frequency);
+                % Remove the repeated points
                 path_real(end - (smoothIndex_pre - 1): end, :) = []; 
                 newPart(1: smoothIndex_cur, :) = [];
                 % Path joint
                 path_real = [path_real; middlePoints; newPart];
             else
-                path_real = Walk(pointSquence(cnt, 1:2), pointSquence(cnt, 3:4), speed, frequency);
+                path_real = Walk(bgPoint(cnt, :), edPoint(cnt, :), speed, frequency);
             end
         end
-        %% Add system noise to the real path
-        % path_real = Theory2Real(path_std);
+        %% Remove the end points
         path_real(end - 2: end, :) = [];
     end
 end

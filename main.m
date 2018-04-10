@@ -8,27 +8,24 @@ if(savepic) saveas(gcf, 'output\1.png'); end
 DrawSigns();
 if(savepic) saveas(gcf, 'output\2.png'); end
 %% Generate real walking path
-% [path_real pathLength frequency] = GenerateRealPath('database', 'route2.mat');
-[path_real pathLength frequency] = GenerateRealPath('manaual', 50, 100);
+[path_real pathLength frequency] = GenerateRealPath('database', 'route2.mat');
+% [path_real pathLength frequency] = GenerateRealPath('manaual', 50, 100);
 %% Show real walking path
 figure(1); hold on; scatter(path_real(:, 1), path_real(:, 2), 0.7, 'r', 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\3.png'); end
 %% Get the observed path
-noise = 50;
-[path_obser index_in index_out] = GenerateObservedPath(path_real, noise, boundPos);
-%% Show the observed path, in the corridor: green, out: blue
+noise_length = 100; noise_angle = 5;
+[path_obser index_in index_out] = GenerateObservedPath(path_real, noise_length, noise_angle, boundPos);
+%% Show the observed path, in the corridor green, out: blue
 figure(1);
 hold on; 
 scatter(path_obser(index_in, 1), path_obser(index_in, 2), 1, 'g', 'filled'); 
 scatter(path_obser(index_out, 1), path_obser(index_out, 2), 1, 'b', 'filled'); 
 hold off;
 if(savepic) saveas(gcf, 'output\4.png'); end
-
-%{
 %% Canculate the 2 errors of the path with noise
 [maxErr_obser, accErr_obser] = GetPositionError(path_real, path_obser);
 fprintf(['Path with noise:\nMax Error: ' num2str(maxErr_obser) ' Accumulate Error: ' num2str(accErr_obser) '\n']);
-
 %% Fuse construction to the path
 prtcleNum_cons = 1000;              % Á£×Ó¸öÊý
 Q = 1000;
@@ -46,7 +43,7 @@ for cnt = 2: length(path_obser)
     path_cons(cnt, :) = sum(prtcle_cons) / prtcleNum_cons;
 end
 %% Show the path confused with construction
-hold on; scatter(path_cons(:, 1), path_cons(:, 2), 1, [1 0 1], 'filled'); hold off;
+figure(1); hold on; scatter(path_cons(:, 1), path_cons(:, 2), 1, [1 0 1], 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\5.png'); end
 %% Canculate the errors of path_cons compared with the observed path
 [maxErr_cons, accErr_cons] = GetPositionError(path_real, path_cons);
@@ -73,7 +70,7 @@ for cnt = 2: length(path_obser)
     path_sign(cnt, :) = sum(prtcle_sign) / prtcleNum_sign;
 end
 %% Show the path confused with signs
-hold on; scatter(path_sign(:, 1), path_sign(:, 2), 1, [0 0 0], 'filled'); hold off;
+figure(1); hold on; scatter(path_sign(:, 1), path_sign(:, 2), 1, [0 0 0], 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\6.png'); end
 %% Canculate the 2 errors of the path with noise cofused with signs
 [maxErr_sign, accErr_sign] = GetPositionError(path_real, path_sign);
@@ -122,5 +119,4 @@ for k = 1: length(path_noise)
    Xmap_pf(k, :) = sum(step(k).Xpf) / prtcleNum;
 end
 hold on; scatter(Xmap_pf(:, 1), Xmap_pf(:, 2), 1, [1 0 1], 'filled'); hold off;
-%}
 %}
