@@ -25,6 +25,17 @@ if(savepic) saveas(gcf, 'output\3.png'); end
 %% Canculate the 2 errors of the observed path
 [maxErr_obser, accErr_obser] = GetPositionError(path_real, path_obser);
 fprintf(['Path with noise:\nMax Error: ' num2str(maxErr_obser) ' Accumulate Error: ' num2str(accErr_obser) '\n']);
+
+[path_kalman maxErr_kalman accErr_kalman]= PredictKalmanPath(path_real, path_obser, frequency);
+figure(1); hold on; scatter(path_kalman(:, 1), path_kalman(:, 2), 1, [1 0 1], 'filled');
+%% Canculate the errors of path_cons compared with the observed path
+maxErrRate_kalman = (maxErr_obser - maxErr_kalman) / maxErr_obser * 100; 
+accErrRate_kalman = (accErr_obser - accErr_kalman) / accErr_obser * 100;
+%% Show errors
+fprintf(['Path Kalman:\nMax error: ' num2str(maxErr_kalman) ' Accumulate error: ' num2str(accErr_kalman) '\n']);
+fprintf(['Max error decrease: ' num2str(maxErrRate_kalman) '%% Accumulate error decrease: ' num2str(accErrRate_kalman) '%%\n']);
+%{
+%% Prediction
 %% Fuse map to the path
 [path_map maxErr_map accErr_map] = PredictMapPath(path_real, path_obser, boundPos);
 %% Show the path confused with construction
@@ -48,44 +59,4 @@ accErrRate_sign = (accErr_obser - accErr_sign) / accErr_obser * 100;
 %% Show error
 fprintf(['Path coufused sign:\nMax error: ' num2str(maxErr_sign) ' Accmulate error: ' num2str(accErr_sign) '\n']);
 fprintf(['Max error decrease: ' num2str(maxErrRate_sign) '%% Accmulate error decrease: ' num2str(accErrRate_sign) '%% \n']);
-%% Use Particle Filter
-%{
-prtcleNum = 100;
-Q = 10;
-R = 1;
-step(1).Xpf = zeros(prtcleNum, 2);         % 粒子滤波估计状态
-step(1).Xparticles = zeros(prtcleNum, 2);  % 粒子集合
-step(1).Zpre_pf = zeros(prtcleNum, 2);     % 粒子滤波观测预测值
-step(1).weight = zeros(prtcleNum, 1);      % 权重初始化
-
-step(1).Xpf = path_noise(1, :) + sqrt(Q) * randn(prtcleNum, 2);
-step(1).Zpre_pf = step(1).Xpf;
-
-for k = 2: length(path_noise)
-   for i = 1: prtcleNum
-      QQ = Q; 
-      net = sqrt(QQ) * randn(1, 2);
-      step(k).Xparticles(i, :) = step(k - 1).Xpf(i, :) + net;
-   end
-   
-   for i = 1: prtcleNum
-      step(k).Zpre_pf(i, :) = step(k).Xparticles(i, :);
-      step(k).weight(i, :) = exp(-0.5 * R ^(-1) * (norm(path_noise(k, :) - step(k).Zpre_pf(i, :)))^2);
-   end
-   step(k).weight(:, 1) = step(k).weight(:, 1)./sum(step(k).weight);
-   
-   outIndex = residualR(step(k).weight(:,1)');
-   
-   step(k).Xpf = step(k).Xparticles(outIndex, :);
-end
-
-bins = 20;
-Xmap_pf = zeros(length(path_noise), 2);
-for k = 1: length(path_noise)
-   %[p, pos] = hist(step(k).Xpf, bins);
-   %map = find(p==max(p));
-   %Xmap_pf(k, :) = pos(map(1), :);
-   Xmap_pf(k, :) = sum(step(k).Xpf) / prtcleNum;
-end
-hold on; scatter(Xmap_pf(:, 1), Xmap_pf(:, 2), 1, [1 0 1], 'filled'); hold off;
 %}
