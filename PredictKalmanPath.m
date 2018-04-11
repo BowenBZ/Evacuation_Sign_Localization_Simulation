@@ -2,13 +2,13 @@ function [path maxErr accErr] = PredictKalmanPath(path_real, path_obser, frequen
 %% Parameters
 T = 1 / frequency;
 N = length(path_real);
-delta_w  = 1e -3;
-Q = delta_w * diag([0.5, 1]);
+delta_w  = 1e-3;
+Q = diag([100, 0, 100, 0]);
 G = [T^2/2, 0;
     T, 0;
     0, T^2/2;
     0, T];
-R = 5;
+R = diag([300, 3]);
 F = [1, T, 0, 0;
     0, 1, 0, 0;
     0, 0, 1, T;
@@ -29,10 +29,10 @@ Xekf(:, 1) = [path_obser(1,1);
 P0 = eye(4);
 for cnt = 2: N
     Xn = F * Xekf(:, cnt-1);    % Predict state
-    P1 = F * P0 * F' + G * Q * G'; % Predict cov 
+    P1 = F * P0 * F' + Q; % Predict cov 
     dd = Xn - Xekf(:, cnt-1); % Predict observation
-    Z(1,1) = norm(dd); 
-    Z(2,1) = GetAngle(dd(1), dd(2));
+    Z = [norm(dd);
+        GetAngle(dd(1), dd(2))];
     % Get Jacoobi H
     H = [dd(1)/norm(dd), 0, dd(2)/norm(dd), 0;
         -dd(2)/(norm(dd))^2, 0, dd(1)/(norm(dd))^2, 0];
