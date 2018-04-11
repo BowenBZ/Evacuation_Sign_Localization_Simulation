@@ -26,12 +26,11 @@ if(savepic) saveas(gcf, 'output\3.png'); end
 [maxErr_obser, accErr_obser] = GetPositionError(path_real, path_obser);
 fprintf(['Path with noise:\nMax Error: ' num2str(maxErr_obser) ' Accumulate Error: ' num2str(accErr_obser) '\n']);
 %% Fuse map to the path
-path_map = PredictMapPath(path_real, path_obser, boundPos);
+[path_map maxErr_map accErr_map] = PredictMapPath(path_real, path_obser, boundPos);
 %% Show the path confused with construction
 figure(1); hold on; scatter(path_map(:, 1), path_map(:, 2), 1, [1 0 1], 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\5.png'); end
 %% Canculate the errors of path_cons compared with the observed path
-[maxErr_map, accErr_map] = GetPositionError(path_real, path_map);
 maxErrRate_map = (maxErr_obser - maxErr_map) / maxErr_obser * 100; 
 accErrRate_map = (accErr_obser - accErr_map) / accErr_obser * 100;
 %% Show errors
@@ -39,12 +38,11 @@ fprintf(['Path coufused construction:\nMax error: ' num2str(maxErr_map) ' Accumu
 fprintf(['Max error decrease: ' num2str(maxErrRate_map) '%% Accumulate error decrease: ' num2str(accErrRate_map) '%%\n']);
 %% Fuse signs to the path
 signWeight = 0.05;
-path_sign = PredictSignPath(path_real, path_obser, boundPos, signType, signPos, signWeight);
+[path_sign maxErr_sign accErr_sign] = PredictSignPath(path_real, path_obser, boundPos, signType, signPos, signWeight);
 %% Show the path confused with signs
 figure(1); hold on; scatter(path_sign(:, 1), path_sign(:, 2), 1, [0 0 0], 'filled'); hold off;
 if(savepic) saveas(gcf, 'output\6.png'); end
 %% Canculate the 2 errors of the path with noise cofused with signs
-[maxErr_sign, accErr_sign] = GetPositionError(path_real, path_sign);
 maxErrRate_sign = (maxErr_obser - maxErr_sign) / maxErr_obser * 100;
 accErrRate_sign = (accErr_obser - accErr_sign) / accErr_obser * 100;
 %% Show error
