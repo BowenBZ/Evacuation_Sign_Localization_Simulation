@@ -2,7 +2,7 @@ function [path_obser index_in index_out]= GenerateObservedPath(path_real, length
 %% Get vectors from the real path
 path_copy = path_real;
 path_real(end, :) = []; path_copy(1, :) = [];
-vector = path_copy - path_real;           % 惯性单元测量出来的是位置点之间的增量
+vector = path_copy - path_real; 
 %% Get length and angle from vectors
 vector_length = (sum(vector.^2, 2)).^(1/2);
 vector_angle = GetAngle(vector(:, 1), vector(:, 2))';

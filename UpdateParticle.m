@@ -1,7 +1,6 @@
 function [particles weight] = UpdateParticle(varargin)
 %% Update particle's weight, then remove the low weight's particles, and copy the hight weight's particles
 %% particleWeight is a N * 1 array, particles is a N * 2 array
-
 %% Get elements from the varargin
 particles = cell2mat(varargin(1));
 weight = cell2mat(varargin(2));
@@ -15,7 +14,6 @@ if(addSign)
    signPos = cell2mat(varargin(9));
    signWeight = cell2mat(varargin(10));
 end
-
 %% Update particle's weight according to 
 %% 1) Canculate the distance of the particles and the observation
 var_diswei = 20;

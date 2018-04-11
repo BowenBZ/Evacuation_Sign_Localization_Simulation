@@ -1,5 +1,5 @@
-%% Rule of Name: case的class(真实的路径):class_case, name的element(路径长度):nameElement, 
-%% Show the map 10约为1m
+%% Rule of Name: one case in class:path_real, element of the name:angleNoise 
+%% Show the map
 clear; clc; close all;
 savepic = 0;
 load parameter_part;

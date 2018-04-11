@@ -2,7 +2,7 @@ function path_sign = PredictSignPath(path_real, path_obser, boundPos, signType, 
 prtcleNum_sign = 1000;
 Q = 1000;
 prtcle_sign = repmat(path_obser(1,:), [prtcleNum_sign 1]) + sqrt(Q) * randn(prtcleNum_sign, 2);
-weight_sign = ones(1, prtcleNum_sign) * 1 / prtcleNum_sign;   % Á£×ÓÈ¨Öµ
+weight_sign = ones(1, prtcleNum_sign) * 1 / prtcleNum_sign; 
 path_sign(1, :) = sum(prtcle_sign) / prtcleNum_sign;
 
 for cnt = 2: length(path_obser)
