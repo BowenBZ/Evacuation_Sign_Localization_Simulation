@@ -1,7 +1,6 @@
 function [particles weight] = UpdateParticle(varargin)
 %% Update particle's weight, then remove the low weight's particles, and copy the hight weight's particles
 %% particleWeight is a N * 1 array, particles is a N * 2 array
-
 %% Get elements from the varargin
 particles = cell2mat(varargin(1));
 weight = cell2mat(varargin(2));
@@ -15,7 +14,6 @@ if(addSign)
    signPos = cell2mat(varargin(9));
    signWeight = cell2mat(varargin(10));
 end
-
 %% Update particle's weight according to 
 %% 1) Canculate the distance of the particles and the observation
 var_diswei = 20;
@@ -43,4 +41,28 @@ weight = NormalizeWeight(weight);
 outIndex = residualR(weight');
 temp = particles(outIndex, :);
 particles = temp;
+end
+
+%% Normalize the weight
+function weight_norm = NormalizeWeight(weight)
+if(sum(weight) ~= 0)
+    weight_norm = weight / sum(weight);    
+else
+    weight_norm =  ones(1, length(weight)) * 1 / length(weight);
+end
+end
+
+%% Get the type of the signs and the distance towards to the sign
+function [type index distance] = GetEvacualationSignInfo(currentPos, signType, signCoordinate)
+%% type: -1: Not detect signs
+detectionThresDistance = 200;
+distanceList = (sum(abs(signCoordinate - currentPos).^2,2).^(1/2));
+[minDistance index] = min(distanceList);
+if(minDistance > detectionThresDistance)
+    type = -1;
+    distance = 0;
+else
+    type = signType(index);
+    distance = minDistance;
+end
 end
