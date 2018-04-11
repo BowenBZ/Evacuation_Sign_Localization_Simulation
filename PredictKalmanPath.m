@@ -1,4 +1,4 @@
-function [path maxErr accErr] = PredictKalmanPath(path_real, path_obser, frequency)
+function [path maxErr accErr] = PredictKalmanPath(path_real, path_obser, signType, signPos, frequency)
 %% Parameters
 T = 1 / frequency;
 N = length(path_real);
@@ -33,7 +33,23 @@ for cnt = 2: N
     dd = Xn - Xekf(:, cnt-1); % Predict observation
     Z = [norm(dd);
         GetAngle(dd(1), dd(2))];
-    % Get Jacoobi H
+    
+    % distance and get Jacoobi H
+    %{
+    [type index dist_real] = GetSignDistance(path_real(cnt, :), signType, signPos);
+    if(type ~= -1)
+        R = diag([300, 3, 50]);
+        vec = Xn' - signPos(index);
+        H = [dd(1)/norm(dd), 0, dd(2)/norm(dd), 0;
+        -dd(2)/(norm(dd))^2, 0, dd(1)/(norm(dd))^2, 0;
+        vec(1)/norm(vec), 0, vec(2)/norm(vec), 0];
+    else
+        R = diag([300, 3]);
+        H = [dd(1)/norm(dd), 0, dd(2)/norm(dd), 0;
+        -dd(2)/(norm(dd))^2, 0, dd(1)/(norm(dd))^2, 0];
+    end
+    %}
+    R = diag([300, 3]);
     H = [dd(1)/norm(dd), 0, dd(2)/norm(dd), 0;
         -dd(2)/(norm(dd))^2, 0, dd(1)/(norm(dd))^2, 0];
     K = P1 * H' * inv(H * P1 * H' + R);

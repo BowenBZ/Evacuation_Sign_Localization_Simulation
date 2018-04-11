@@ -23,14 +23,12 @@ weight = Guassian(distance, 0, var_diswei);
 weight = NormalizeWeight(weight);
 %% 2) the information of the signs
 if(addSign)
-    [type index dist_real] = GetEvacualationSignInfo(currentPos, signType, signPos);
+    [type index dist_real] = GetSignDistance(currentPos, signType, signPos);
     if(type ~= -1)
         ddist = (sum((particles - signPos(index, :)).^2, 2)).^(1/2) - dist_real;
         var_diswei = 10;
-        ddist_weight = Guassian(ddist, 0, var_diswei);
-        ddist_weight = NormalizeWeight(ddist_weight);
-        weight = ddist_weight * signWeight + weight * (1 - signWeight);
-        weight = NormalizeWeight(weight);
+        ddist_weight = NormalizeWeight(Guassian(ddist, 0, var_diswei));
+        weight = NormalizeWeight(ddist_weight * signWeight + weight * (1 - signWeight));
     end
 end
 %% 3) If the particle is out of the corridor, weight set 0
@@ -49,21 +47,5 @@ if(sum(weight) ~= 0)
     weight_norm = weight / sum(weight);    
 else
     weight_norm =  ones(1, length(weight)) * 1 / length(weight);
-end
-end
-
-%% Get the type of the signs and the distance towards to the sign
-function [type index distance] = GetEvacualationSignInfo(currentPos, signType, signCoordinate)
-%% type: -1: Not detect signs
-detectionThresDistance = 200;
-distanceList = (sum(abs(signCoordinate - currentPos).^2,2).^(1/2));
-[minDistance index] = min(distanceList);
-if(minDistance > detectionThresDistance)
-    type = -1;
-    distance = 0;
-else
-    type = signType(index);
-    Q = 2000;   % observed noise
-    distance = minDistance + sqrt(Q) * randn;
 end
 end

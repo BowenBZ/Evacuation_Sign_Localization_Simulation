@@ -25,16 +25,12 @@ end
 %% Form observed vectors
 obvector_length = vector_length + gw_length + bias_length';
 obvector_angle = vector_angle + gw_angle + bias_angle';
-%{
-Use awgn to add noise(use SNR as parameter)
-SNR_length = 10; SNR_angle = 10;
-obvector_length = awgn(vector_length, 10, 'measured', 'linear');    % Guassian White Noise
-obvector_angle = awgn(vector_angle, 10, 'measured', 'linear');
-%}
 obvector = [vector_length.*cosd(obvector_angle) vector_length.*sind(obvector_angle)];
 %% Show the origin vectors and observed vectors
+%{
 figure(2); subplot(1,2,1); hold on; plot(obvector_length); plot(vector_length);  hold off; legend('real', 'observed'); %axis([0 length(vector_length) 0.4 0.6]);
 subplot(1,2,2); hold on; plot(obvector_angle); plot(vector_angle);  hold off; legend('real', 'observed');
+%}
 %% Generate observed path
 path_obser(1, :) = path_real(1, :);
 for cnt = 1: length(obvector)
