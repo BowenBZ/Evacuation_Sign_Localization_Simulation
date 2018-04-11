@@ -25,7 +25,7 @@ if(savepic) saveas(gcf, 'output\3.png'); end
 %% Canculate the 2 errors of the observed path
 [maxErr_obser, accErr_obser] = GetPositionError(path_real, path_obser);
 fprintf(['Path with noise:\nMax Error: ' num2str(maxErr_obser) ' Accumulate Error: ' num2str(accErr_obser) '\n']);
-
+%{
 [path_kalman maxErr_kalman accErr_kalman]= PredictKalmanPath(path_real, path_obser, frequency);
 figure(1); hold on; scatter(path_kalman(:, 1), path_kalman(:, 2), 1, [1 0 1], 'filled');
 %% Canculate the errors of path_cons compared with the observed path
@@ -34,7 +34,8 @@ accErrRate_kalman = (accErr_obser - accErr_kalman) / accErr_obser * 100;
 %% Show errors
 fprintf(['Path Kalman:\nMax error: ' num2str(maxErr_kalman) ' Accumulate error: ' num2str(accErr_kalman) '\n']);
 fprintf(['Max error decrease: ' num2str(maxErrRate_kalman) '%% Accumulate error decrease: ' num2str(accErrRate_kalman) '%%\n']);
-%{
+%}
+
 %% Prediction
 %% Fuse map to the path
 [path_map maxErr_map accErr_map] = PredictMapPath(path_real, path_obser, boundPos);
@@ -59,4 +60,3 @@ accErrRate_sign = (accErr_obser - accErr_sign) / accErr_obser * 100;
 %% Show error
 fprintf(['Path coufused sign:\nMax error: ' num2str(maxErr_sign) ' Accmulate error: ' num2str(accErr_sign) '\n']);
 fprintf(['Max error decrease: ' num2str(maxErrRate_sign) '%% Accmulate error decrease: ' num2str(accErrRate_sign) '%% \n']);
-%}

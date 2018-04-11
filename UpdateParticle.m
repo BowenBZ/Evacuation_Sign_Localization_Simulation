@@ -63,6 +63,7 @@ if(minDistance > detectionThresDistance)
     distance = 0;
 else
     type = signType(index);
-    distance = minDistance;
+    Q = 2000;   % observed noise
+    distance = minDistance + sqrt(Q) * randn;
 end
 end
