@@ -27,8 +27,9 @@ plot(detectAbiList, newData(:,1));
 plot(detectAbiList, newData(:,3));
 hold off;
 legend('map', 'sign');
-title('Max Error Rate');
+title('Max Error Decreased Rate');
 axis([0 1 0 100]);
+xlabel('\alpha'); ylabel('R(err_{max})');
 
 subplot(1,2,2);
 hold on;
@@ -36,5 +37,6 @@ plot(detectAbiList, newData(:,2));
 plot(detectAbiList, newData(:,4));
 hold off;
 legend('map', 'sign');
-title('Ave Error Rate');
+title('Average Error Decreased Rate');
 axis([0 1 0 100]);
+xlabel('\alpha'); ylabel('R(err_{avve})');
