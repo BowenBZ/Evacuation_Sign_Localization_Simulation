@@ -1,5 +1,5 @@
 load signAbi.mat
-
+cd('..');
 data(:,1) = data(:,1) - mean(data(:,1));
 data(:,1) = data(:,1) / std(data(:,1)) * 50;
 data(:,2) = data(:,2) - mean(data(:,2));
@@ -36,5 +36,5 @@ plot(detectAbiList, newData(:,2));
 plot(detectAbiList, newData(:,4));
 hold off;
 legend('map', 'sign');
-title('Acc Error Rate');
+title('Ave Error Rate');
 axis([0 1 0 100]);

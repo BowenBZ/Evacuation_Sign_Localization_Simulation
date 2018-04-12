@@ -1,4 +1,5 @@
 load midterm2.mat;
+cd('..');
 index = length(data);
 
 data(:,1) = data(:,1) - mean(data(:,1));
@@ -26,7 +27,7 @@ plot(data(:,1));
 plot(data(:,3));
 hold off;
 legend('map', 'sign');
-title('max error');
+title('Max Error');
 axis([1 index 0 100]);
 xpos = 100;
 ypos = 100;
@@ -43,7 +44,7 @@ plot(data(:,2));
 plot(data(:,4));
 hold off;
 legend('map', 'sign');
-title('acc error');
+title('Ave Error');
 axis([1 index 0 100]);
 text(xpos,ypos - ydelta,['map-mean: ', num2str(acc_map_mean)]);
 text(xpos,ypos - 2*ydelta,['map-var: ', num2str(acc_map_var)]);
