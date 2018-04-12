@@ -13,6 +13,7 @@ if(addSign)
    signType = cell2mat(varargin(8));
    signPos = cell2mat(varargin(9));
    signWeight = cell2mat(varargin(10));
+   detecAbi = cell2mat(varargin(11));
 end
 %% Update particle's weight according to 
 %% 1) Canculate the distance of the particles and the observation
@@ -23,7 +24,7 @@ weight = Guassian(distance, 0, var_diswei);
 weight = NormalizeWeight(weight);
 %% 2) the information of the signs
 if(addSign)
-    [type index dist_real] = GetSignDistance(currentPos, signType, signPos);
+    [type index dist_real] = GetSignDistance(currentPos, signType, signPos, detecAbi);
     if(type ~= -1)
         ddist = (sum((particles - signPos(index, :)).^2, 2)).^(1/2) - dist_real;
         var_diswei = 10;

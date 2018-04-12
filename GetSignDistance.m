@@ -1,5 +1,5 @@
 %% Get the type of the signs and the distance towards to the sign
-function [type index distance] = GetSignDistance(currentPos, signType, signCoordinate)
+function [type index distance] = GetSignDistance(currentPos, signType, signCoordinate, detectAbi)
 %% type: -1: Not detect signs
 detectionThresDistance = 200;
 distanceList = (sum(abs(signCoordinate - currentPos).^2,2).^(1/2));
@@ -11,5 +11,9 @@ else
     type = signType(index);
     Q = 2000;   % observed noise
     distance = minDistance + sqrt(Q) * randn;
+end
+if(rand>detectAbi)
+    type = -1;
+    distance = 0;
 end
 end

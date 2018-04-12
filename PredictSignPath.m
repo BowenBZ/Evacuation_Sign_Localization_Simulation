@@ -1,4 +1,4 @@
-function [path maxErr accErr] = PredictSignPath(path_real, path_obser, speed, frequency, boundPos, signType, signPos, signWeight)
+function [path maxErr accErr] = PredictSignPath(path_real, path_obser, speed, frequency, boundPos, signType, signPos, signWeight, detectAbi)
 %% Paremeters
 prtcleNum = 1000;
 Q = 1000;
@@ -18,7 +18,7 @@ for cnt = 2: length(path_obser)
     % Canculate the weight of particles and resample the particles
     [prtcle weight] = UpdateParticle(prtcle, weight, ...
         path(cnt-1, :), path_obser(cnt, :) - path_obser(cnt-1, :), boundPos, 1, ...
-            path_real(cnt, :), signType, signPos, signWeight);
+            path_real(cnt, :), signType, signPos, signWeight, detectAbi);
     % Canculate the path according to the particle set
     path(cnt, :) = sum(prtcle) / prtcleNum;
 end

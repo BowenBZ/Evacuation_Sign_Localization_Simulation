@@ -54,7 +54,7 @@ fprintf(['Path coufused construction:\nMax error: ' num2str(maxErr_map) ' Accumu
 fprintf(['Max error decrease: ' num2str(maxErrRate_map) '%% Accumulate error decrease: ' num2str(accErrRate_map) '%%\n']);
 %% Fuse signs to the path
 signWeight = 0.05;
-[path_sign maxErr_sign accErr_sign] = PredictSignPath(path_real, path_obser, speed, frequency, boundPos, signType, signPos, signWeight);
+[path_sign maxErr_sign accErr_sign] = PredictSignPath(path_real, path_obser, speed, frequency, boundPos, signType, signPos, signWeight, detectAbi);
 %% Show the path confused with signs
 if(showpic) figure(1); hold on; scatter(path_sign(:, 1), path_sign(:, 2), 1, [0 0 0], 'filled'); hold off; end
 if(savepic) saveas(gcf, 'output\6.png'); end
