@@ -27,10 +27,8 @@ obvector_length = vector_length + gw_length + bias_length';
 obvector_angle = vector_angle + gw_angle + bias_angle';
 obvector = [vector_length.*cosd(obvector_angle) vector_length.*sind(obvector_angle)];
 %% Show the origin vectors and observed vectors
-%{
-figure(2); subplot(1,2,1); hold on; plot(obvector_length); plot(vector_length);  hold off; legend('real', 'observed'); %axis([0 length(vector_length) 0.4 0.6]);
-subplot(1,2,2); hold on; plot(obvector_angle); plot(vector_angle);  hold off; legend('real', 'observed');
-%}
+figure(2); subplot(1,2,1); hold on; plot(obvector_length); plot(vector_length); hold off; legend('real', 'observed'); title('Length with Noise'); xlabel('step_k'); ylabel('length(1unit)');
+subplot(1,2,2); hold on; plot(obvector_angle); plot(vector_angle);  hold off; legend('real', 'observed'); title('Angle with Noise'); xlabel('step_k'); ylabel('angle(1^o)')
 %% Generate observed path
 path_obser(1, :) = path_real(1, :);
 for cnt = 1: length(obvector)
