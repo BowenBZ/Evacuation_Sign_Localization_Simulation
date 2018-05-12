@@ -1,5 +1,6 @@
+%% Handle the data of 500 times' experiments and plot it
 load midterm2.mat;
-cd('..');
+% cd('..');
 index = length(data);
 
 data(:,1) = data(:,1) - mean(data(:,1));

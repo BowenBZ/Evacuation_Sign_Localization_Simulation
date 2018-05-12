@@ -1,8 +1,11 @@
+%% Make animation of the generation process
 clear; clc; close all;
-load parameter_part; load midterm;
+load midterm;
+cd('..');
+load parameter_part;
 map = imread('fit6_part.jpg'); imshow(map);
 DrawSigns();
-ginput();
+% ginput();
 hold on;
 for cnt = 1: length(path_real)
    scatter(path_real(cnt, 1), path_real(cnt, 2), 0.7, 'r', 'filled');
@@ -16,3 +19,4 @@ for cnt = 1: length(path_real)
    pause(0.000000000000001);
 end
 hold off;
+cd('midterm');

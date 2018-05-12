@@ -1,4 +1,4 @@
-function [path_obser index_in index_out]= GenerateObservedPath(path_real, lengthStd, angleStd, boundaryPoints, frequency)
+function [path_obser index_in index_out]= GenerateObservedPath(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise)
 %% Get vectors from the real path
 path_copy = path_real;
 path_real(end, :) = []; path_copy(1, :) = [];
@@ -27,8 +27,10 @@ obvector_length = vector_length + gw_length + bias_length';
 obvector_angle = vector_angle + gw_angle + bias_angle';
 obvector = [vector_length.*cosd(obvector_angle) vector_length.*sind(obvector_angle)];
 %% Show the origin vectors and observed vectors
+if(showfigNoise)
 figure(2); subplot(1,2,1); hold on; plot(obvector_length); plot(vector_length); hold off; legend('real', 'observed'); title('Length with Noise'); xlabel('step_k'); ylabel('length(1unit)');
 subplot(1,2,2); hold on; plot(obvector_angle); plot(vector_angle);  hold off; legend('real', 'observed'); title('Angle with Noise'); xlabel('step_k'); ylabel('angle(1^o)')
+end
 %% Generate observed path
 path_obser(1, :) = path_real(1, :);
 for cnt = 1: length(obvector)
@@ -36,7 +38,7 @@ for cnt = 1: length(obvector)
 end
 %% Get the index of in the corridor and out of the corridor
 index = inpolygon(path_obser(:, 1), path_obser(:, 2), ...
-        boundaryPoints(:, 1), boundaryPoints(:, 2));
+        boundPos(:, 1), boundPos(:, 2));
 index_in = find(index == 1); 
 index_out = find(index == 0);
 end

@@ -1,8 +1,15 @@
-function [path maxErr accErr] = PredictMapPath(path_real, path_obser, speed, frequency, boundPos)
+function [path maxErr accErr] = PredictMapPath(para)
+%% Fuse 2D Map information to the observed path using particle filter 
 %% Parameters
-prtcleNum = 1000;
-Q = 10000;
-prtcle = repmat(path_obser(1,:), [prtcleNum 1]) + sqrt(Q) * randn(prtcleNum, 2);
+path_real = para{1};
+path_obser = para{2};
+speed = para{3}; 
+frequency = para{4};
+boundPos = para{5};
+prtcleNum = para{6};
+prdctRadiSqu = para{7};
+
+prtcle = repmat(path_obser(1,:), [prtcleNum 1]) + sqrt(prdctRadiSqu) * randn(prtcleNum, 2);
 weight = ones(prtcleNum, 1) * 1 / prtcleNum;    
 path(1, :) = sum(prtcle) / prtcleNum;
 dt = 1 / frequency;
@@ -13,9 +20,8 @@ for cnt = 2: length(path_obser)
     else
         vec = path(cnt-1, :) - path(cnt-2, :);
     end
-    % vec = path_obser(cnt, :) - path_obser(cnt-1, :);
     % Update the particles of the next time point
-    prtcle = prtcle + vec / norm(vec) * speed * dt + sqrt(Q) * randn(prtcleNum, 2);
+    prtcle = prtcle + vec / norm(vec) * speed * dt + sqrt(prdctRadiSqu) * randn(prtcleNum, 2);
     % Canculate the weight of particles and resample the particles
     [prtcle weight] = UpdateParticle(prtcle, weight, ...
         path(cnt-1, :), path_obser(cnt,:) - path_obser(cnt-1, :), boundPos, 0);

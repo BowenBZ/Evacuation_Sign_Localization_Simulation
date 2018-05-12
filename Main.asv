@@ -7,8 +7,8 @@ showfig = 0; % whether show figures(every path is in one figure)
 savefig = 0; % whether save figures(every path is saved seperately)
 showfigNoise = 0; % whether show noise figures(add noise and not)
 
-speed = 50; % the speed of person moves in real path(50 unit / 1 second)
-frequency = 100; % the frequency of sensor's detection
+speed = 50; % the speed of person moves(50 unit / 1 second)
+frequency = 100; % the frequency of sensor's dete 
 
 prtcleNum_map = 1000; % the number of particles used in map process
 prdctRadiSqu_map = 10000; % the square of radius of the prediction area
@@ -26,6 +26,7 @@ if(showfig)
 end
 if(savefig) saveas(gcf, 'output\1.png'); end
 %% Generate real walking path
+
 [path_real pathLength frequency] = GenerateRealPath('database', 'route3.mat');
 % [path_real pathLength frequency] = GenerateRealPath('manaual', speed, frequency);
 %% Show real walking path

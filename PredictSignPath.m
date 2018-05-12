@@ -1,8 +1,19 @@
-function [path maxErr accErr] = PredictSignPath(path_real, path_obser, speed, frequency, boundPos, signType, signPos, signWeight, detectAbi)
+function [path maxErr accErr] = PredictSignPath(para)
+%% Fuse 2D Map and Signs information to the observed path using particle filter 
 %% Paremeters
-prtcleNum = 1000;
-Q = 1000;
-prtcle = repmat(path_obser(1,:), [prtcleNum 1]) + sqrt(Q) * randn(prtcleNum, 2);
+path_real = para{1};
+path_obser = para{2};
+speed = para{3};
+frequency = para{4};
+boundPos = para{5};
+signType = para{6};
+signPos = para{7};
+signWeight = para{8}; 
+detectAbi = para{9};
+prtcleNum = para{10};
+prdctRadiSqu = para{11};
+
+prtcle = repmat(path_obser(1,:), [prtcleNum 1]) + sqrt(prdctRadiSqu) * randn(prtcleNum, 2);
 weight = ones(1, prtcleNum) * 1 / prtcleNum; 
 path(1, :) = sum(prtcle) / prtcleNum;
 dt = 1 / frequency;
@@ -14,7 +25,7 @@ for cnt = 2: length(path_obser)
     else
         vec = path(cnt-1, :) - path(cnt-2, :);
     end
-    prtcle = prtcle + sqrt(Q) * randn(prtcleNum, 2); %+ vec / norm(vec) * speed * dt + 
+    prtcle = prtcle + sqrt(prdctRadiSqu) * randn(prtcleNum, 2); %+ vec / norm(vec) * speed * dt + 
     % Canculate the weight of particles and resample the particles
     [prtcle weight] = UpdateParticle(prtcle, weight, ...
         path(cnt-1, :), path_obser(cnt, :) - path_obser(cnt-1, :), boundPos, 1, ...

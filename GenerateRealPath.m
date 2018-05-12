@@ -1,5 +1,5 @@
 function [path_real pathLength frequency] = GenerateRealPath(varargin)
-%% Generate path for the map, can load from database or manaually set
+%% Generate path for the map, can choose to load from database or manaually set
 %% source: 'database', 'manual'
 %% when source is database, the next element is filename; when source is manaual, 
 %% the next element is speed and frequency
@@ -15,18 +15,18 @@ elseif(nargin == 3)
     frequency = double(string(varargin(3)));
     if(source == 'manaual')
         %% Choose key points
-        [bgPoint edPoint] = GetPointFromMap();
-        pathLength = sum(sum(abs(bgPoint - edPoint).^2, 2).^(1/2));
+        [bgPos edPos] = GetPosFromMap();
+        pathLength = sum(sum(abs(bgPos - edPos).^2, 2).^(1/2));
         %% Generate the path
-        for cnt = 1: size(bgPoint, 1)
+        for cnt = 1: size(bgPos, 1)
             if(exist('path_real', 'var'))
                 % Generate a new path
-                newPart = Walk(bgPoint(cnt, :), edPoint(cnt, :), speed, frequency);              
+                newPart = Walk(bgPos(cnt, :), edPos(cnt, :), speed, frequency);              
                 % Generate some middle points;
                 smoothIndex_pre = 3; smoothIndex_cur = 3;
                 smoothIndex_cur = min(3, length(newPart));
-                vector_pre = edPoint(cnt-1, :) - bgPoint(cnt-1, :);
-                vector_cur = edPoint(cnt, :) - bgPoint(cnt, :);
+                vector_pre = edPos(cnt-1, :) - bgPos(cnt-1, :);
+                vector_cur = edPos(cnt, :) - bgPos(cnt, :);
                 middlePoints = VectorInterp([path_real(end - (smoothIndex_pre - 1): end, :); ...
                                              newPart(2: smoothIndex_cur, :)], ...
                                                 vector_pre, vector_cur, speed, frequency);
@@ -36,7 +36,7 @@ elseif(nargin == 3)
                 % Path joint
                 path_real = [path_real; middlePoints; newPart];
             else
-                path_real = Walk(bgPoint(cnt, :), edPoint(cnt, :), speed, frequency);
+                path_real = Walk(bgPos(cnt, :), edPos(cnt, :), speed, frequency);
             end
         end
         %% Remove the end points
@@ -46,20 +46,20 @@ end
 end
 
 %% Return a simulated real walking path with motion noise according to the input
-function path = Walk(startPoint, endPoint, speed, frequency)
+function path = Walk(bgPos, edPos, speed, frequency)
 %% startPoint, endPoint: 2-dimensional coordinates(m); speed: (m/s); frequency: (Hz)
-walkDirection = (endPoint - startPoint) / norm(endPoint - startPoint);
+walkDirection = (edPos - bgPos) / norm(edPos - bgPos);
 %% Form the route and add length noise to each point
 lengthStd = 0.01;  %(unit length)
 dx = 1 / frequency * speed;
 cnt = 1; 
-path(cnt, :) = startPoint;
-while(norm(path(cnt, :) - endPoint) >= 2 * dx)
+path(cnt, :) = bgPos;
+while(norm(path(cnt, :) - edPos) >= 2 * dx)
     cnt = cnt + 1;
     stepLength = 1 / frequency * speed * (1 + lengthStd * randn);   % Add noise to length
     path(cnt, :) = path(cnt - 1, :) + walkDirection * stepLength;
 end
-path(end + 1, :) = endPoint;
+path(end + 1, :) = edPos;
 %% Add angle noise to each point
 angleStd = 0.2;   %(deg)
 for cnt = (length(path) - 1) : -1 : 2
@@ -114,10 +114,10 @@ crossPoint(1,1) = (k1*pos1(1) - k2*pos2(1) - pos1(2) + pos2(2)) / (k1 - k2);
 crossPoint(1,2) = k1*(crossPoint(1, 1) - pos1(1)) + pos1(2);
 end
 
-function [bgPoint edPoint]= GetPointFromMap()
+function [bgPos edPos]= GetPosFromMap()
 %% Get the point from map and generate a point squence
 points = ginput();
 points_copy = points;
 points(end, :) = []; points_copy(1, :) = [];
-bgPoint = points; edPoint = points_copy;
+bgPos = points; edPos = points_copy;
 end

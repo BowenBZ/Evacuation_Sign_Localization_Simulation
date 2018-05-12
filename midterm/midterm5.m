@@ -1,5 +1,6 @@
+%% Handle the data of different detection ability
 load signAbi.mat
-cd('..');
+% cd('..');
 data(:,1) = data(:,1) - mean(data(:,1));
 data(:,1) = data(:,1) / std(data(:,1)) * 50;
 data(:,2) = data(:,2) - mean(data(:,2));

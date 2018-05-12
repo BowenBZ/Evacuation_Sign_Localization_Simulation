@@ -17,18 +17,18 @@ if(addSign)
 end
 %% Update particle's weight according to 
 %% 1) Canculate the distance of the particles and the observation
-var_diswei = 20;
+var_dis2wei = 20;
 distanceSqu = sum((particles - prePos - obserVec).^2, 2);
 distance = distanceSqu.^(1/2);
-weight = Guassian(distance, 0, var_diswei);
+weight = Guassian(distance, 0, var_dis2wei);
 weight = NormalizeWeight(weight);
 %% 2) the information of the signs
 if(addSign)
     [type index dist_real] = GetSignDistance(currentPos, signType, signPos, detecAbi);
     if(type ~= -1)
         ddist = (sum((particles - signPos(index, :)).^2, 2)).^(1/2) - dist_real;
-        var_diswei = 10;
-        ddist_weight = NormalizeWeight(Guassian(ddist, 0, var_diswei));
+        var_dis2wei = 10;
+        ddist_weight = NormalizeWeight(Guassian(ddist, 0, var_dis2wei));
         weight = NormalizeWeight(ddist_weight * signWeight + weight * (1 - signWeight));
     end
 end
