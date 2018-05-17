@@ -2,49 +2,40 @@ clear;
 lmpsdata = ReadDataFromLMPS('lee5_12.csv'); 
 dt = lmpsdata.time(2) - lmpsdata.time(1);
 
-alpha = 0.1;
-smoacc(:, 1) = smoothData(lmpsdata.linacc(:, 1), alpha);
-smoacc(:, 2) = smoothData(lmpsdata.linacc(:, 2), alpha);
-smoacc(:, 3) = smoothData(lmpsdata.linacc(:, 3), alpha);
-alpha = 0.1;
-smoeuler(:, 1) = smoothData(lmpsdata.euler(:, 1), alpha);
-smoeuler(:, 2) = smoothData(lmpsdata.euler(:, 2), alpha);
-smoeuler(:, 3) = smoothData(lmpsdata.euler(:, 3), alpha);
+alpha = 0.05;
+smoacc(:, 1) = smoothData(lmpsdata.acc(:, 1), alpha);
+smoacc(:, 2) = smoothData(lmpsdata.acc(:, 2), alpha);
+smoacc(:, 3) = smoothData(lmpsdata.acc(:, 3), alpha);
 
 for cnt = 1: length(lmpsdata.time)
-    phi = smoeuler(cnt, 1);
-    theta = smoeuler(cnt, 2);
-    psi = smoeuler(cnt, 3);
+    phi = lmpsdata.euler(cnt, 1);
+    theta = lmpsdata.euler(cnt, 2);
+    psi = lmpsdata.euler(cnt, 3);
 
     R = Rxb(phi) * Ryb(theta) * Rd(psi);
     newacc(:, cnt) = inv(R) * smoacc(cnt, :)';
 end
 newacc = newacc';
 
-figure(1); title('old acclerate');
+figure(1)
 subplot(3,1,1); plot(lmpsdata.acc(:, 1));
 subplot(3,1,2); plot(lmpsdata.acc(:, 2));
 subplot(3,1,3); plot(lmpsdata.acc(:, 3)); 
 
-figure(2); title('smoothy acclerate');
+figure(2)
 subplot(3,1,1); plot(smoacc(:, 1));
 subplot(3,1,2); plot(smoacc(:, 2));
 subplot(3,1,3); plot(smoacc(:, 3)); 
 
-figure(3); title('transfer acclerate');
+figure(3)
 subplot(3,1,1); plot(newacc(:, 1));
 subplot(3,1,2); plot(newacc(:, 2));
 subplot(3,1,3); plot(newacc(:, 3)); 
 
 dt = lmpsdata.time(2) - lmpsdata.time(1);
 path = GeneratePath(newacc, dt);
-figure(4); title('path');
+figure(4)
 scatter(path(:, 1), path(:, 2), 1, 'filled');
-
-figure(5); title('euler');
-subplot(3,1,1); plot(smoeuler(:, 1));
-subplot(3,1,2); plot(smoeuler(:, 2));
-subplot(3,1,3); plot(smoeuler(:, 3)); 
 
 function path = GeneratePath(acc, dt)
 % Get Speed and Path
