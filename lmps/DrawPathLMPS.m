@@ -1,12 +1,12 @@
 clear;
-lmpsdata = ReadDataFromLMPS('lee5_12.csv'); 
+lmpsdata = ReadDataFromLMPS('test.csv'); 
 dt = lmpsdata.time(2) - lmpsdata.time(1);
 
 alpha = 0.1;
 smoacc(:, 1) = smoothData(lmpsdata.linacc(:, 1), alpha);
 smoacc(:, 2) = smoothData(lmpsdata.linacc(:, 2), alpha);
 smoacc(:, 3) = smoothData(lmpsdata.linacc(:, 3), alpha);
-alpha = 0.1;
+alpha = 0.01;
 smoeuler(:, 1) = smoothData(lmpsdata.euler(:, 1), alpha);
 smoeuler(:, 2) = smoothData(lmpsdata.euler(:, 2), alpha);
 smoeuler(:, 3) = smoothData(lmpsdata.euler(:, 3), alpha);
@@ -21,28 +21,29 @@ for cnt = 1: length(lmpsdata.time)
 end
 newacc = newacc';
 
-figure(1); title('old acclerate');
-subplot(3,1,1); plot(lmpsdata.acc(:, 1));
-subplot(3,1,2); plot(lmpsdata.acc(:, 2));
-subplot(3,1,3); plot(lmpsdata.acc(:, 3)); 
+figure(1); 
+subplot(3,1,1); plot(lmpsdata.linacc(:, 1)); title('old acclerate'); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
+subplot(3,1,2); plot(lmpsdata.linacc(:, 2)); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
+subplot(3,1,3); plot(lmpsdata.linacc(:, 3)); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
 
-figure(2); title('smoothy acclerate');
-subplot(3,1,1); plot(smoacc(:, 1));
-subplot(3,1,2); plot(smoacc(:, 2));
-subplot(3,1,3); plot(smoacc(:, 3)); 
+figure(2); 
+subplot(3,1,1); plot(smoacc(:, 1)); title('smoothy acclerate'); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
+subplot(3,1,2); plot(smoacc(:, 2)); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
+subplot(3,1,3); plot(smoacc(:, 3)); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
 
-figure(3); title('transfer acclerate');
-subplot(3,1,1); plot(newacc(:, 1));
+figure(3); 
+subplot(3,1,1); plot(newacc(:, 1)); title('transfer acclerate');
 subplot(3,1,2); plot(newacc(:, 2));
 subplot(3,1,3); plot(newacc(:, 3)); 
 
 dt = lmpsdata.time(2) - lmpsdata.time(1);
 path = GeneratePath(newacc, dt);
-figure(4); title('path');
+figure(4); 
 scatter(path(:, 1), path(:, 2), 1, 'filled');
+title('path');
 
-figure(5); title('euler');
-subplot(3,1,1); plot(smoeuler(:, 1));
+figure(5); 
+subplot(3,1,1); plot(smoeuler(:, 1)); title('euler');
 subplot(3,1,2); plot(smoeuler(:, 2));
 subplot(3,1,3); plot(smoeuler(:, 3)); 
 
@@ -78,6 +79,6 @@ function newData=smoothData(oldData, arfa)
 newData(1) = oldData(1);
 length = size(oldData,1);
 for i=2:length 
- newData(i)=arfa*oldData(i-1)+(1-arfa)*newData(i-1);
+  newData(i)=arfa*oldData(i-1)+(1-arfa)*newData(i-1);
 end
 end

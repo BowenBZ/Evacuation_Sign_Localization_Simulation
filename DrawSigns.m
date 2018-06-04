@@ -1,8 +1,11 @@
 %% Draw evacualation signs and corridor's boundary
 figure(1);
 hold on;
-plot(boundPos(:, 1), boundPos(:, 2), 'color', [217, 83, 25] / 255, 'linewidth', 1.4);
-scatter(signPos(:, 1), signPos(:, 2), 'filled');
+p1 = plot(boundPos(:, 1), boundPos(:, 2), 'color', [217, 83, 25] / 255, 'linewidth', 1.4);
+p2 = scatter(signPos(:, 1), signPos(:, 2), 's'); 
+set(get(get(p1,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
+% set(get(get(p2,'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); 
+legend('Evacuation Sign');
 for cnt = 1: length(signPos)
     switch signType(cnt)
         case 0
