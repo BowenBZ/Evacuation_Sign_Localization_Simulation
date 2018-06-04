@@ -6,7 +6,7 @@ for bigcnt = 1: 4
     for cnt = 1: 100
        (bigcnt - 1) * 100 + cnt
        Main();
-       data((bigcnt - 1) * 100 + cnt, :) = [maxErrRate_map accErrRate_map maxErrRate_sign accErrRate_sign]; 
+       data((bigcnt - 1) * 100 + cnt, :) = [maxErr_obser accErr_obser maxErrRate_map accErrRate_map maxErrRate_sign accErrRate_sign]; 
     end
 end
 save('midterm2.mat');

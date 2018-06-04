@@ -1,4 +1,4 @@
-function [path maxErr accErr] = PredictSignPath(para)
+function [path maxErr accErr stepErr] = PredictSignPath(para)
 %% Fuse 2D Map and Signs information to the observed path using particle filter 
 %% Paremeters
 path_real = para{1};
@@ -34,5 +34,5 @@ for cnt = 2: length(path_obser)
     path(cnt, :) = sum(prtcle) / prtcleNum;
 end
 %% Canculate the errors of path_cons compared with the real path
-[maxErr, accErr] = GetPositionError(path_real, path);
+[maxErr, accErr, stepErr] = GetPositionError(path_real, path);
 end

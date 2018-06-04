@@ -1,15 +1,15 @@
-function [path maxErr accErr] = PredictKalmanPath(path_real, path_obser, signType, signPos, frequency)
+function [path maxErr accErr stepErr] = PredictKalmanPath(path_real, path_obser, signType, signPos, frequency)
 %% Parameters
 T = 1 / frequency;
 N = length(path_real);
 delta_w  = 1e-3;
-Q = diag([100, 0, 100, 0]);
-G = [T^2/2, 0;
+Q = diag([100, 0]);  % var of process noise
+G = [T^2/2, 0;               % drive matrix of process noise
     T, 0;
     0, T^2/2;
     0, T];
-R = diag([300, 3]);
-F = [1, T, 0, 0;
+R = diag([30, 0]);         % var of observed noise
+F = [1, T, 0, 0;            % transfer matrix of state
     0, 1, 0, 0;
     0, 0, 1, T;
     0, 0, 0, 1];
@@ -22,15 +22,16 @@ vector_length = (sum(vector.^2, 2)).^(1/2);
 vector_angle = GetAngle(vector(:, 1), vector(:, 2))';
 %% EKF
 Xekf = zeros(4, N);
-Xekf(:, 1) = [path_obser(1,1);
-                0.25;
+Xekf(:, 1) = [path_obser(1,1);  % beginning position and speed
+                0.01;
                 path_obser(1,2);
-                0.25];
+                0.01];
 P0 = eye(4);
 for cnt = 2: N
     Xn = F * Xekf(:, cnt-1);    % Predict state
-    P1 = F * P0 * F' + Q; % Predict cov 
-    dd = Xn - Xekf(:, cnt-1); % Predict observation
+    P1 = F * P0 * F' + G * Q * G';       % Predict cov 
+    dd = Xn - Xekf(:, cnt-1);   % Predict observation
+    % dd = path_obser(cnt, :) - path_obser(cnt-1, :);
     Z = [norm(dd);
         GetAngle(dd(1), dd(2))];
     
@@ -49,7 +50,7 @@ for cnt = 2: N
         -dd(2)/(norm(dd))^2, 0, dd(1)/(norm(dd))^2, 0];
     end
     %}
-    R = diag([300, 3]);
+
     H = [dd(1)/norm(dd), 0, dd(2)/norm(dd), 0;
         -dd(2)/(norm(dd))^2, 0, dd(1)/(norm(dd))^2, 0];
     K = P1 * H' * inv(H * P1 * H' + R);
@@ -59,5 +60,5 @@ end
 %% Generate the route
 path = Xekf([1 3], :)';
 %% Canculate the errors of path_cons compared with the real path
-[maxErr, accErr] = GetPositionError(path_real, path);
+[maxErr, accErr, stepErr] = GetPositionError(path_real, path);
 end
