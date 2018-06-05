@@ -2,7 +2,7 @@
 %% Rule of Name: one case in class:path_real, element of the name:angleNoise 
 %% Parameters
 % clear; clc; close all;
-filename = 'route1.mat'; % load route data
+% filename = 'route1.mat'; % load route data
 autoload = 1; % 1-auto load   2-handle load
 
 showfig = 0; % whether show figures(every path is in one figure)
@@ -13,12 +13,15 @@ interval = 20; % draw a path point every 20 points
 speed = 50; % the speed of person moves in real path(50 unit / 1 second)
 frequency = 100; % the frequency of sensor's detection
 
-prtcleNum_map = 10000; % the number of particles used in map process
-prdctRadiSqu_map = 10; % the square of radius of the prediction area
+lengthStd = [0.10, 0.01]; % std of length every step (unit)
+angleStd = [3, 1]; % std of angle every step (deg)
+
+prtcleNum_map = 5000; % the number of particles used in map process
+prdctRadiSqu_map = 1000; % the square of radius of the prediction area
 
 signWeight = 0.05; % the weight of information from signs(compared with map)
 detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
-prtcleNum_sign = 10000; % the number of particles used in sign process
+prtcleNum_sign = 5000; % the number of particles used in sign process
 prdctRadiSqu_sign = 1000; % the square of radius of the prediction area
 
 addpath('./database');
@@ -42,7 +45,6 @@ if(showfig)
 end
 if(savefig) saveas(gcf, 'output\path-real.png'); end
 %% Get the observed path
-lengthStd = [0.050, 0.01]; angleStd = [3, 1];
 [path_obser index_in index_out] = GePath_Obser(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise);
 % Show the observed path, in the corridor green, out: blue
 if(showfig)
@@ -69,9 +71,11 @@ legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Kalman Path');
 end
 %}
 %% Fuse map to the path
+tic;
 transferParameter = {path_real, path_obser, ...
     speed, frequency, boundPos, prtcleNum_map, prdctRadiSqu_map};
 [path_map stepErr_map] = PrePath_Map(transferParameter);
+time_map = toc;
 % Show the path confused with construction
 if(showfig)
     ShowPath(1, interval, path_map, 10, '^');
@@ -82,10 +86,12 @@ if(savefig) saveas(gcf, 'output\path-map.png'); end
 fprintf('Path coufused map:\n');
 PrintError(stepErr_map * u2m);
 %% Fuse signs to the path
+tic;
 transferParameter = {path_real, path_obser, ...
     speed, frequency, boundPos, signType, signPos, ...
     signWeight, detectAbi, prtcleNum_sign, prdctRadiSqu_sign};
 [path_sign stepErr_sign] = PrePath_Sign(transferParameter);
+time_sign = toc;
 % Show the path confused with signs
 if(showfig) 
     figure(2); imshow(map); 
