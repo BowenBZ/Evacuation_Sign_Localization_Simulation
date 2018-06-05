@@ -2,10 +2,11 @@
 %% Rule of Name: one case in class:path_real, element of the name:angleNoise 
 %% Parameters
 % clear; clc; close all;
-filename = 'route3.mat'; % load route data
+filename = 'route1.mat'; % load route data
+autoload = 1; % 1-auto load   2-handle load
 
-showfig = 1; % whether show figures(every path is in one figure)
-savefig = 1; % whether save figures(every path is saved seperately)
+showfig = 0; % whether show figures(every path is in one figure)
+savefig = 0; % whether save figures(every path is saved seperately)
 showfigNoise = 0; % whether show noise figures(add noise and not)
 interval = 20; % draw a path point every 20 points
 
@@ -29,8 +30,11 @@ if(showfig)
 end
 if(savefig) saveas(gcf, 'output\map.png'); end
 %% Generate real walking path
-[path_real pathLength frequency] = GePath_Real('database', filename);
-% [path_real pathLength frequency] = GePath_Real('manaual', speed, frequency);
+if(autoload)
+    [path_real pathLength frequency] = GePath_Real('database', filename);
+else
+    [path_real pathLength frequency] = GePath_Real('manaual', speed, frequency);
+end
 % Show real walking path
 if(showfig) 
     ShowPath(1, interval, path_real, 10, '.');
