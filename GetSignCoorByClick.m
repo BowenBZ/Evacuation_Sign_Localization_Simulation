@@ -1,7 +1,8 @@
 %% Get the coordinate of evacuation signs
 clear
 clc
-img = imread('fit6_gray.jpg');
+addpath('./database');
+img = imread('fit6_gray2.jpg');
 imshow(img);
-signCoordinate = ginput();
+pos = ginput();
 % signType = 

@@ -10,10 +10,10 @@ vector_angle = GetAngle(vector(:, 1), vector(:, 2))';
 Guassian = randn(length(vector_length), 1); 
 Guassian = Guassian - mean(Guassian); Guassian = Guassian / std(Guassian);
 dt = 1 / frequency;
-gdStd_length = lengthStd(1) / sqrt(dt);     % Guassian White Noise
-gdStd_angle = angleStd(1) / sqrt(dt);
-bgdStd_length = lengthStd(2) * sqrt(dt);    % Random Noise
-bgdStd_angle = angleStd(2) * sqrt(dt);
+gdStd_length = lengthStd(1) / sqrt(dt);     % Guassian White Noise length
+gdStd_angle = angleStd(1) / sqrt(dt);       % Guassian White Noise angle
+bgdStd_length = lengthStd(2) * sqrt(dt);    % Random Noise length
+bgdStd_angle = angleStd(2) * sqrt(dt);      % Random Noise angle
 
 gw_length = gdStd_length * Guassian;
 gw_angle = gdStd_angle * Guassian;
@@ -25,7 +25,7 @@ end
 %% Form observed vectors
 obvector_length = vector_length + gw_length + bias_length';
 obvector_angle = vector_angle + gw_angle + bias_angle';
-obvector = [vector_length.*cosd(obvector_angle) vector_length.*sind(obvector_angle)];
+obvector = [obvector_length.*cosd(obvector_angle) obvector_length.*sind(obvector_angle)];
 %% Show the origin vectors and observed vectors
 if(showfigNoise)
 figure(2); subplot(1,2,1); hold on; plot(obvector_length); plot(vector_length); hold off; legend('real', 'observed'); title('Length with Noise'); xlabel('step_k'); ylabel('length(1unit)');
