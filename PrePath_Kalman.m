@@ -1,4 +1,9 @@
-function [path maxErr accErr stepErr] = PredictKalmanPath(path_real, path_obser, signType, signPos, frequency)
+function [path stepErr] = PrePath_Kalman(para)
+path_real = para{1};
+path_obser = para{2};
+signType = para{3};
+signPos = para{4};
+frequency = para{5};
 %% Parameters
 T = 1 / frequency;
 N = length(path_real);
@@ -60,5 +65,5 @@ end
 %% Generate the route
 path = Xekf([1 3], :)';
 %% Canculate the errors of path_cons compared with the real path
-[maxErr, accErr, stepErr] = GetPositionError(path_real, path);
+stepErr = GetPositionError(path_real, path);
 end

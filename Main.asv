@@ -5,9 +5,8 @@
 filename = 'route3.mat'; % load route data
 
 showfig = 1; % whether show figures(every path is in one figure)
-savefig = 1; % whether save figures(every path is saved seperately)
+savefig = 0; % whether save figures(every path is saved seperately)
 showfigNoise = 0; % whether show noise figures(add noise and not)
-interval = 20; % draw a path point every 20 points
 
 speed = 50; % the speed of person moves in real path(50 unit / 1 second)
 frequency = 100; % the frequency of sensor's detection
@@ -17,11 +16,11 @@ prdctRadiSqu_map = 10; % the square of radius of the prediction area
 
 signWeight = 0.05; % the weight of information from signs(compared with map)
 detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
-prtcleNum_sign = 1000; % the number of particles used in sign process
-prdctRadiSqu_sign = 1000; % the square of radius of the prediction area
+prtcleNum_sign = 1000;
+prdctRadiSqu_sign = 1000;
 
-addpath('./database');
 load parameter_part;    % includes boundPos, signPos, signType
+addpath('./route');
 %% Show the original map
 if(showfig) 
     figure(1); map = imread('fit6_gray.jpg'); imshow(map); 
@@ -29,22 +28,29 @@ if(showfig)
 end
 if(savefig) saveas(gcf, 'output\map.png'); end
 %% Generate real walking path
-[path_real pathLength frequency] = GePath_Real('database', filename);
-% [path_real pathLength frequency] = GePath_Real('manaual', speed, frequency);
+[path_real pathLength frequency] = GenerateRealPath('database', filename);
+% [path_real pathLength frequency] = GenerateRealPath('manaual', speed, frequency);
 % Show real walking path
 if(showfig) 
-    ShowPath(1, interval, path_real, 10, '.');
+    interval = 20;
+    list = [1:interval:length(path_real)];
+    figure(1); hold on;
+    scatter(path_real(list, 1), path_real(list, 2), 10, 'r', 'o'); 
     legend('Evacuation Sign', 'Real Path');
+    hold off; 
 end
 if(savefig) saveas(gcf, 'output\path-real.png'); end
 %% Get the observed path
 lengthStd = [300, 50]; angleStd = [3, 1];
-[path_obser index_in index_out] = GePath_Obser(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise);
+[path_obser index_in index_out] = GenerateObservedPath(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise);
 % Show the observed path, in the corridor green, out: blue
 if(showfig)
     interval = 20;
-    ShowPath(1, interval, path_obser, 10, '+');
+    list = [1:interval:length(path_real)];
+    figure(1); hold on;
+    scatter(path_obser(list, 1), path_obser(list, 2), 10, 'b', '+'); 
     legend('Evacuation Sign', 'Real Path', 'Observed Path');
+    hold off;
 end
 if(savefig) saveas(gcf, 'output\path-obser.png'); end
 % Canculate the 2 errors of the observed path
@@ -55,7 +61,7 @@ PrintError(stepErr_obser);
 %% Kalman Filter
 transferParameter = {path_real, path_obser, ...
                      signType,  signPos, frequency};
-[path_kalman stepErr_kalman] = PrePath_Kalman(transferParameter);
+[path_kalman stepErr_kalman] = PredictPath_Kalman(transferParameter);
 % Show the path
 if(showfig)
 figure(1); hold on; 
@@ -63,15 +69,26 @@ scatter(path_kalman(:, 1), path_kalman(:, 2), 1, [1 0 1], 'filled');
 hold off;
 legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Kalman Path');
 end
+if(savefig) saveas(gcf, 'output\path-kalman.png'); end
+% Canculate the errors of path_cons compared with the observed path
+maxErrRate_kalman = (maxErr_obser - maxErr_kalman) / maxErr_obser * 100; 
+accErrRate_kalman = (accErr_obser - accErr_kalman) / accErr_obser * 100;
+% Show errors
+fprintf(['Path Kalman:\nMax error: ' num2str(maxErr_kalman) ' Accumulate error: ' num2str(accErr_kalman) '\n']);
+fprintf(['Max error decrease: ' num2str(maxErrRate_kalman) '%% Accumulate error decrease: ' num2str(accErrRate_kalman) '%%\n']);
 %}
 %% Fuse map to the path
 transferParameter = {path_real, path_obser, ...
     speed, frequency, boundPos, prtcleNum_map, prdctRadiSqu_map};
-[path_map stepErr_map] = PrePath_Map(transferParameter);
+[path_map stepErr_map] = PredictPath_Map(transferParameter);
 % Show the path confused with construction
 if(showfig)
-    ShowPath(1, interval, path_map, 10, '^');
-    legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Fuse Map to Path'); 
+    interval = 20;
+    list = [1:interval:length(path_real)];
+    figure(1); hold on; 
+    scatter(path_map(list, 1), path_map(list, 2), 10, [1 0 1], '^'); 
+    legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Fuse Map to Path');
+    hold off; 
 end
 if(savefig) saveas(gcf, 'output\path-map.png'); end
 % Show errors
@@ -81,15 +98,15 @@ PrintError(stepErr_map);
 transferParameter = {path_real, path_obser, ...
     speed, frequency, boundPos, signType, signPos, ...
     signWeight, detectAbi, prtcleNum_sign, prdctRadiSqu_sign};
-[path_sign stepErr_sign] = PrePath_Sign(transferParameter);
+[path_sign stepErr_sign] = PredictPath_Sign(transferParameter);
 % Show the path confused with signs
 if(showfig) 
-    figure(2); map = imread('fit6_gray.jpg'); imshow(map); 
-    DrawSigns();
-    ShowPath(2, interval, path_real, 10, '.');
-    ShowPath(2, interval, path_obser, 10, '+');
-    ShowPath(2, interval, path_sign, 10, 'o');
-    legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Fuse Sign to Path');
+    interval = 10;
+    list = [1:interval:length(path_real)];
+    figure(1); hold on; 
+    scatter(path_sign(list, 1), path_sign(list, 2), 30, [0 0 0], '.');
+    legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Fuse Map to Path','Fuse Sign to Path');
+    hold off;
 end
 if(savefig) saveas(gcf, 'output\path-sign.png'); end
 % Show error
@@ -97,7 +114,7 @@ fprintf('Path coufused sign:\n');
 PrintError(stepErr_sign);
 %% Draw step errors
 if(showfig)
-    figure(3);
+    figure(2);
     timeline = [1:1:length(stepErr_obser)];
     timeline = (timeline - 1) / 100;
     size = 0.1;
@@ -111,10 +128,11 @@ if(showfig)
     if(savefig) saveas(gcf, 'output\error.png'); end
 end
 
-function ShowPath(fNum, interval, path, size, shape)
-list = [1:interval:length(path)];
-figure(fNum); hold on;
-scatter(path(list, 1), path(list, 2), size, 'k', shape); 
+function ShowPath(fNum, interval, path)
+list = [1:interval:length(path_real)];
+figure(1); hold on;
+scatter(path_real(list, 1), path_real(list, 2), 10, 'r', 'o'); 
+legend('Evacuation Sign', 'Real Path');
 hold off; 
 end
 

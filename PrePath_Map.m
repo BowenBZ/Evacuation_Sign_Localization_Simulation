@@ -1,4 +1,4 @@
-function [path maxErr accErr stepErr] = PredictMapPath(para)
+function [path stepErr] = PrePath_Map(para)
 %% Fuse 2D Map information to the observed path using particle filter 
 %% Parameters
 path_real = para{1};
@@ -29,5 +29,5 @@ for cnt = 2: length(path_obser)
     path(cnt, :) = sum(prtcle) / prtcleNum;
 end
 %% Canculate the errors of path_cons compared with the real path
-[maxErr, accErr, stepErr] = GetPositionError(path_real, path);
+stepErr = GetPositionError(path_real, path);
 end

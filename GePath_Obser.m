@@ -1,4 +1,4 @@
-function [path_obser index_in index_out]= GenerateObservedPath(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise)
+function [path_obser index_in index_out]= GePath_Obser(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise)
 %% Get vectors from the real path
 path_copy = path_real;
 path_real(end, :) = []; path_copy(1, :) = [];

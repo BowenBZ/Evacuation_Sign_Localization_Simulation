@@ -1,4 +1,4 @@
-function [path_real pathLength frequency] = GenerateRealPath(varargin)
+function [path_real pathLength frequency] = GePath_Real(varargin)
 %% Generate path for the map, can choose to load from database or manaually set
 %% source: 'database', 'manual'
 %% when source is database, the next element is filename; when source is manaual, 
