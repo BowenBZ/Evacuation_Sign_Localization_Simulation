@@ -2,7 +2,7 @@
 %% Rule of Name: one case in class:path_real, element of the name:angleNoise 
 %% Parameters
 % clear; clc; close all;
-% filename = 'route1.mat'; % load route data
+filename = 'route1.mat'; % load route data
 autoload = 1; % 1-auto load   2-handle load
 
 showfig = 0; % whether show figures(every path is in one figure)
@@ -19,8 +19,8 @@ angleStd = [3, 1]; % std of angle every step (deg)
 prtcleNum_map = 5000; % the number of particles used in map process
 prdctRadiSqu_map = 1000; % the square of radius of the prediction area
 
-signWeight = 0.05; % the weight of information from signs(compared with map)
-detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
+% signWeight = 0.05; % the weight of information from signs(compared with map)
+% detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
 prtcleNum_sign = 5000; % the number of particles used in sign process
 prdctRadiSqu_sign = 1000; % the square of radius of the prediction area
 
