@@ -9,9 +9,11 @@ boundPos = para{5};
 signType = para{6};
 signPos = para{7};
 signWeight = para{8}; 
-detectAbi = para{9};
-prtcleNum = para{10};
-prdctRadiSqu = para{11};
+prtcleNum = para{9};
+prdctRadiSqu = para{10};
+detectAbi = para{11};
+detectReg = para{12};
+detectOfs = para{13};
 
 prtcle = repmat(path_obser(1,:), [prtcleNum 1]) + sqrt(prdctRadiSqu) * randn(prtcleNum, 2);
 weight = ones(1, prtcleNum) * 1 / prtcleNum; 
@@ -29,7 +31,8 @@ for cnt = 2: length(path_obser)
     % Canculate the weight of particles and resample the particles
     [prtcle weight] = UpdateParticle(prtcle, weight, ...
         path(cnt-1, :), path_obser(cnt, :) - path_obser(cnt-1, :), boundPos, 1, ...
-            path_real(cnt, :), signType, signPos, signWeight, detectAbi);
+            path_real(cnt, :), signType, signPos, signWeight, ...
+                detectAbi, detectReg, detectOfs);
     % Canculate the path according to the particle set
     path(cnt, :) = sum(prtcle) / prtcleNum;
 end

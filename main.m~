@@ -27,8 +27,8 @@ prdctRadiSqu_sign = 2; % the square of radius of the prediction area (meter)
 
 signWeight = 0.05; % the weight of information from signs(compared with map)(from 0 to 1)
 detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
-detectReg = 2; % the max region that sensor can detect (meter)
-detectOfs = 0; % the offset of the noise of the sensor's detection (meter)
+% detectReg = 17; % the max region that sensor can detect (meter)
+% detectOfs = 0; % the offset of the noise of the sensor's detection (meter)
 
 prdctRadiSqu_map = (prdctRadiSqu_map / u2m)^2;
 prdctRadiSqu_sign = (prdctRadiSqu_sign / u2m)^2;
