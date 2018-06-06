@@ -7,7 +7,7 @@ if(nargin == 2)
     source = string(varargin(1));
     filename = string(varargin(2));
     if(source == 'database' )
-        load route1.mat;
+        load(filename);
     end
 elseif(nargin == 3)
     source = string(varargin(1));
