@@ -16,7 +16,7 @@ elseif(nargin == 3)
     map = double(string(varargin(4)));
     if(source == 'manaual')
         %% Choose key points
-        figure(10); imshow(map); 
+        figure(1); imshow(map); 
         [bgPos edPos] = GetPosFromMap(); DrawSigns();
         pathLength = sum(sum(abs(bgPos - edPos).^2, 2).^(1/2));
         %% Generate the path

@@ -4,8 +4,8 @@
 % clear; clc; close all;
 autoload = 1; % 1-auto load   2-handle load
 prekalman = 1; 
-premap = 1;
-presign = 1;
+premap = 0;
+presign = 0;
 
 routename = 'route1.mat'; % load route data
 mapname = 'fit6_gray2.jpg';
@@ -18,17 +18,17 @@ interval = 20; % draw a path point every 20 points
 speed = 50; % the speed of person moves in real path(50 unit / 1 second)
 frequency = 100; % the frequency of sensor's detection
 
-lengthStd = [0.10, 0.01]; % std of length every step (unit)
+lengthStd = [0.1, 0.05]; % std of length every step (unit)
 angleStd = [3, 1]; % std of angle every step (deg)
 
 prtcleNum_map = 1000; % the number of particles used in map process
-prdctRadiSqu_map = 2; % the square of radius of the prediction area (meter)
+prdctRadiSqu_map = 10; % the square of radius of the prediction area (meter)
 
 prtcleNum_sign = 1000; % the number of particles used in sign process
-prdctRadiSqu_sign = 2; % the square of radius of the prediction area (meter)
+prdctRadiSqu_sign = 10; % the square of radius of the prediction area (meter)
 
-signWeight = 0.05; % the weight of information from signs(compared with map)(from 0 to 1)
-detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
+signWeight = 0.3; % the weight of information from signs(compared with map)(from 0 to 1)
+detectAbi = 0.7; % the sensor's detection ability of signs(from 0 to 1)
 detectReg = 2; % the max region that sensor can detect (meter)
 detectOfs = 0; % the offset of the noise of the sensor's detection (meter)
 
@@ -49,7 +49,7 @@ end
 % Show real walking path
 if(showfig) 
     if(autoload)
-       figure(10); imshow(map); DrawSigns(); 
+       figure(1); imshow(map); DrawSigns(); 
     end
     ShowPath(1, interval, path_real, 10, '.');
     legend('Evacuation Sign', 'Real Path');
@@ -59,7 +59,6 @@ if(savefig) saveas(gcf, 'output\path-real.png'); end
 [path_obser index_in index_out] = GePath_Obser(path_real, lengthStd, angleStd, boundPos, frequency, showfigNoise);
 % Show the observed path, in the corridor green, out: blue
 if(showfig)
-    figure(10);
     ShowPath(1, interval, path_obser, 10, '+');
     legend('Evacuation Sign', 'Real Path', 'Observed Path');
 end
@@ -77,14 +76,16 @@ transferParameter = {path_real, path_obser, ...
 time_kalman = toc;
 % Show the path
 if(showfig)
-    figure(1); imshow(map); 
-    DrawSigns();
-    ShowPath(1, interval, path_real, 10, '.');
-    ShowPath(1, interval, path_obser, 10, '+');
-    ShowPath(1, interval, path_kalman, 10, 'o');
+    figure(2); imshow(map); DrawSigns();
+    ShowPath(2, interval, path_real, 10, '.');
+    ShowPath(2, interval, path_obser, 10, '+');
+    ShowPath(2, interval, path_kalman, 10, 'v');
     legend('Evacuation Sign', 'Real Path', 'Observed Path',...
         'Kalman Path');
 end
+% Print Error
+fprintf('Kalman Filter:\n')
+PrintError(stepErr_kalman * u2m);
 end
 %% Fuse map to the path
 if(premap)
@@ -95,17 +96,15 @@ transferParameter = {path_real, path_obser, ...
 time_map = toc;
 % Show the path confused with construction
 if(showfig)
-    figure(2); imshow(map); 
-    DrawSigns();
-    ShowPath(2, interval, path_real, 10, '.');
-    ShowPath(2, interval, path_obser, 10, '+');
-    ShowPath(2, interval, path_map, 10, 'o');
-    legend('Evacuation Sign', 'Real Path', 'Observed Path',...
-        'Fuse Sign to Path');
+    figure(3); imshow(map); DrawSigns();
+    ShowPath(3, interval, path_real, 10, '.');
+    ShowPath(3, interval, path_obser, 10, '+');
+    ShowPath(3, interval, path_map, 10, '^');
+    legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Fuse Map to Path');
 end
 if(savefig) saveas(gcf, 'output\path-map.png'); end
 % Show errors
-fprintf('Path coufused map:\n');
+fprintf('Path Fused Map:\n');
 PrintError(stepErr_map * u2m);
 end
 %% Fuse signs to the path
@@ -119,33 +118,50 @@ transferParameter = {path_real, path_obser, ...
 time_sign = toc;
 % Show the path confused with signs
 if(showfig) 
-    figure(3); imshow(map); 
-    DrawSigns();
-    ShowPath(3, interval, path_real, 10, '.');
-    ShowPath(3, interval, path_obser, 10, '+');
-    ShowPath(3, interval, path_sign, 10, 'o');
-    legend('Evacuation Sign', 'Real Path', 'Observed Path',...
-        'Fuse Sign to Path');
+    figure(4); imshow(map); DrawSigns();
+    ShowPath(4, interval, path_real, 10, '.');
+    ShowPath(4, interval, path_obser, 10, '+');
+    ShowPath(4, interval, path_sign, 10, 'o');
+    legend('Evacuation Sign', 'Real Path', 'Observed Path', 'Fuse Sign to Path');
 end
 if(savefig) saveas(gcf, 'output\path-sign.png'); end
 % Show error
 fprintf('Path coufused sign:\n');
 PrintError(stepErr_sign * u2m);
+end
 %% Draw step errors
-if(premap & showfig)
-    figure(4);
-    timeline = [1:1:length(stepErr_obser)];
+if(showfig)
+    figure(5);
+    timeline = [1:1:pathLength];
     timeline = (timeline - 1) / 100;
     size = 0.1;
     hold on;
     plot(timeline, stepErr_obser * u2m, 'k:');
-    plot(timeline, stepErr_map * u2m, 'k--');
-    plot(timeline, stepErr_sign * u2m, 'k-');
+    texttype = [0 0 0];
+    if(prekalman)
+        plot(timeline, stepErr_kalman * u2m, 'k:.');
+        texttype = texttype | [1 0 0];
+    end
+    if(premap)
+        plot(timeline, stepErr_map * u2m, 'k--');
+        texttype = texttype | [0 1 0];
+    end
+    if(presign)
+        plot(timeline, stepErr_sign * u2m, 'k-');
+        texttype = texttype | [0 0 1];
+    end
     hold off;
-    xlabel('Time(s)'); ylabel('Error(m)'); 
-    legend('Observed Path', 'Path Fused with Map', 'Path Fused with Map and Signs');
+    xlabel('Time(s)'); ylabel('Error(m)');
+    ptext = {'Path Kalman Filter', 'Path Fused with Map',...
+        'Path Fused with Map and Signs'};
+    legendtext = {'Observed Path'};
+    for cnt = 1: 3
+       if(texttype(cnt))         
+           legendtext = {legendtext{:} ptext{cnt}};
+       end
+    end
+    legend(legendtext);
     if(savefig) saveas(gcf, 'output\error.png'); end
-end
 end
 
 function ShowPath(fNum, interval, path, size, shape)
