@@ -13,9 +13,11 @@ elseif(nargin == 3)
     source = string(varargin(1));
     speed = double(string(varargin(2)));
     frequency = double(string(varargin(3)));
+    map = double(string(varargin(4)));
     if(source == 'manaual')
         %% Choose key points
-        [bgPos edPos] = GetPosFromMap();
+        figure(10); imshow(map); 
+        [bgPos edPos] = GetPosFromMap(); DrawSigns();
         pathLength = sum(sum(abs(bgPos - edPos).^2, 2).^(1/2));
         %% Generate the path
         for cnt = 1: size(bgPos, 1)
