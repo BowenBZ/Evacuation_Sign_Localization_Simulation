@@ -3,9 +3,10 @@
 %% Parameters
 % clear; clc; close all;
 addpath('./database');
-load parameter2;    % includes boundPos, signPos, signType?u2m
+load parameter2;    % includes boundPos, signPos, signType, u2m
 
-filename = 'route1.mat'; % load route data
+routename = 'route1.mat'; % load route data
+mapname = 'fit6_gray2.jpg';
 autoload = 1; % 1-auto load   2-handle load
 
 showfig = 0; % whether show figures(every path is in one figure)
@@ -36,13 +37,13 @@ detectReg = detectReg / u2m;
 detectOfs = detectOfs / u2m;
 %% Show the original map
 if(showfig) 
-    figure(1); map = imread('fit6_gray2.jpg'); imshow(map); 
+    figure(1); map = imread(mapname); imshow(map); 
     DrawSigns();
 end
 if(savefig) saveas(gcf, 'output\map.png'); end
 %% Generate real walking path
 if(autoload)
-    [path_real pathLength frequency] = GePath_Real('database', filename);
+    [path_real pathLength frequency] = GePath_Real('database', routename);
 else
     [path_real pathLength frequency] = GePath_Real('manaual', speed, frequency);
 end
