@@ -18,7 +18,7 @@ interval = 20; % draw a path point every 20 points
 speed = 50; % the speed of person moves in real path(50 unit / 1 second)
 frequency = 100; % the frequency of sensor's detection
 
-lengthStd = [0.1, 0.05]; % std of length every step (unit)
+lengthStd = [0.01, 0.005]; % std of length every step (unit)
 angleStd = [3, 1]; % std of angle every step (deg)
 
 prtcleNum_map = 1000; % the number of particles used in map process
@@ -28,11 +28,12 @@ prtcleNum_sign = 1000; % the number of particles used in sign process
 prdctRadiSqu_sign = 10; % the square of radius of the prediction area (meter)
 
 signWeight = 0.3; % the weight of information from signs(compared with map)(from 0 to 1)
-detectAbi = 0.7; % the sensor's detection ability of signs(from 0 to 1)
+detectAbi = 1; % the sensor's detection ability of signs(from 0 to 1)
 detectReg = 2; % the max region that sensor can detect (meter)
 detectOfs = 0; % the offset of the noise of the sensor's detection (meter)
 
 addpath('./database');
+% load basicvalue;
 load parameter2;    % includes boundPos, signPos, signType, u2m
 prdctRadiSqu_map = (prdctRadiSqu_map / u2m)^2;
 prdctRadiSqu_sign = (prdctRadiSqu_sign / u2m)^2;
