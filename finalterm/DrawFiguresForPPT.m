@@ -119,6 +119,7 @@ hold off;
 legend('观测','方法1','方法2');
 xlabel('识别率'); ylabel('平均定位误差（米）');
 %}
+%{
 distanceNoise = [0 0.5 1 2 3];
 obser = [37.54 38.13 37.69 37.37 37.62];
 method1 = [32.14 35.02 31.82 33.10 37.62];
@@ -134,3 +135,25 @@ plot(distanceNoise, method2, 'y', 'LineWidth', 2);
 hold off;
 legend('观测','方法1','方法2');
 xlabel('距离检测误差（米）'); ylabel('平均定位误差（米）');
+%}
+route1m = [78.65 75.94 8.10];
+route2m = [63.57 67.25 8.93];
+route3m = [64.19 45.93 7.20];
+route1a = [37.32 35.31 1.55];
+route2a = [34.53 36.62 1.52];
+route3a = [30.19 16.50 1.81];
+b = bar([route1m; route2m; route3m]);
+ch = get(b, 'children');
+set(ch{1}, 'FaceVertexCData', 'r');
+set(ch{2}, 'FaceVertexCData', 'g');
+set(ch{3}, 'FaceVertexCData', 'b');
+legend('观测','方法1','方法2');
+xlabel('路径'); ylabel('最大定位误差（米）');
+figure;
+b = bar([route1a; route2a; route3a]);
+ch = get(b, 'children');
+set(ch{1}, 'FaceVertexCData', 'r');
+set(ch{2}, 'FaceVertexCData', 'g');
+set(ch{3}, 'FaceVertexCData', 'b');
+legend('观测','方法1','方法2');
+xlabel('路径'); ylabel('平均定位误差（米）');
