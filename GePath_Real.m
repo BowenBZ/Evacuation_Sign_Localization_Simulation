@@ -9,15 +9,15 @@ if(nargin == 2)
     if(source == 'database' )
         load(filename);
     end
-elseif(nargin == 3)
+elseif(nargin == 4)
     source = string(varargin(1));
     speed = double(string(varargin(2)));
     frequency = double(string(varargin(3)));
-    map = double(string(varargin(4)));
+    map = varargin{4};
     if(source == 'manaual')
         %% Choose key points
         figure(1); imshow(map); 
-        [bgPos edPos] = GetPosFromMap(); DrawSigns();
+        [bgPos edPos] = GetPosFromMap(); load parameter2; DrawSigns();
         pathLength = sum(sum(abs(bgPos - edPos).^2, 2).^(1/2));
         %% Generate the path
         for cnt = 1: size(bgPos, 1)
@@ -43,6 +43,7 @@ elseif(nargin == 3)
         end
         %% Remove the end points
         path_real(end - 2: end, :) = [];
+        pathLength = length(path_real);
     end
 end
 end

@@ -2,10 +2,10 @@
 %% Rule of Name: one case in class:path_real, element of the name:angleNoise 
 %% Parameters
 % clear; clc; close all;
-autoload = 1; % 1-auto load   2-handle load
-prekalman = 1; 
+autoload = 0; % 1-auto load   2-handle load
+prekalman = 0; 
 premap = 0;
-presign = 0;
+presign = 1;
 
 routename = 'route1.mat'; % load route data
 mapname = 'fit6_gray2.jpg';
