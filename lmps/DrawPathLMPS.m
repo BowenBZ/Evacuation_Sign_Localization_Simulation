@@ -1,5 +1,5 @@
 clear;
-lmpsdata = ReadDataFromLMPS('test.csv'); 
+lmpsdata = ReadDataFromLMPS('final.csv'); 
 dt = lmpsdata.time(2) - lmpsdata.time(1);
 
 alpha = 0.1;
@@ -32,9 +32,9 @@ subplot(3,1,2); plot(smoacc(:, 2)); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0
 subplot(3,1,3); plot(smoacc(:, 3)); axis([0 length(lmpsdata.linacc(:, 1)) -0.5 0.5]);
 
 figure(3); 
-subplot(3,1,1); plot(newacc(:, 1)); title('transfer acclerate');
-subplot(3,1,2); plot(newacc(:, 2));
-subplot(3,1,3); plot(newacc(:, 3)); 
+subplot(3,1,1); plot(newacc(:, 1)); title('transfer acclerate'); xlim([0 length(newacc)]);
+subplot(3,1,2); plot(newacc(:, 2)); xlim([0 length(newacc)]);
+subplot(3,1,3); plot(newacc(:, 3)); xlim([0 length(newacc)]);
 
 dt = lmpsdata.time(2) - lmpsdata.time(1);
 path = GeneratePath(newacc, dt);
@@ -43,9 +43,9 @@ scatter(path(:, 1), path(:, 2), 1, 'filled');
 title('path');
 
 figure(5); 
-subplot(3,1,1); plot(smoeuler(:, 1)); title('euler');
-subplot(3,1,2); plot(smoeuler(:, 2));
-subplot(3,1,3); plot(smoeuler(:, 3)); 
+subplot(3,1,1); plot(smoeuler(:, 1)); title('euler'); xlim([0 length(smoeuler)]);
+subplot(3,1,2); plot(smoeuler(:, 2)); xlim([0 length(smoeuler)]);
+subplot(3,1,3); plot(smoeuler(:, 3)); xlim([0 length(smoeuler)]);
 
 function path = GeneratePath(acc, dt)
 % Get Speed and Path
